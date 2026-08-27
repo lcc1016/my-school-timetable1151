@@ -13,7 +13,7 @@ let navHistory      = [];   // 導航歷史 [{type, value}]
 let classGroups     = {};   // 班級分類
 let subjectTeachers = {};   // 科目→教師
 
-const PERIODS_ALL   = [0,1,2,3,4,5,6,7];  // 0=早自習, 1~7=第1~7節
+const PERIODS_ALL   = [0,1,2,3,4,5,6,7,8];  // 0=早自習, 1~8=第1~8節
 const DAYS          = ['一','二','三','四','五'];
 
 /* ── DOM 參考 ─────────────────────────────────────────────── */
@@ -229,7 +229,7 @@ function parseCSV(text) {
 function buildCategories() {
     // ── 班級分類 ──
     const allClasses = new Set();
-    const PERIODS = [0,1,2,3,4,5,6,7];  // 0=早自習
+    const PERIODS = [0,1,2,3,4,5,6,7,8,9];  // 0=早自習
     
     scheduleData.forEach(row => {
         for (let d = 1; d <= 5; d++) {
@@ -502,8 +502,8 @@ function buildScheduleTable(cells, mode) {
         html += '</tr>';
     }
 
-    // 第1~7節
-    for (let p = 1; p <= 7; p++) {
+    // 第1~8節
+    for (let p = 1; p <= 8; p++) {
         const pt = periods[p] || { start: '', end: '' };
         html += `<tr><td class="td-period"><div class="period-num">第${p}節</div>`;
         if (pt.start && pt.start !== '——') {
