@@ -144,7 +144,7 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
 });
 
 /* ═══════════════════════════════════════════════════════════
-   CSV 載入與解析
+   CSV 載入與解析 (已修改：強制 UTF-8 解碼與剔除 BOM)
 ═══════════════════════════════════════════════════════════ */
 async function fetchAndParseCSV(semLabel) {
     if (loadingOverlay) loadingOverlay.classList.add('show');
@@ -158,7 +158,14 @@ async function fetchAndParseCSV(semLabel) {
     try {
         const response = await fetch(csvUrl);
         if (!response.ok) throw new Error(`HTTP 錯誤 ${response.status}`);
-        const csvText = await response.text();
+        
+        // ── 強制 UTF-8 解碼並排除 BOM ──
+        const buffer = await response.arrayBuffer();
+        const decoder = new TextDecoder('utf-8');
+        let csvText = decoder.decode(buffer);
+        if (csvText.charCodeAt(0) === 0xFEFF) {
+            csvText = csvText.slice(1);
+        }
 
         // 取得對應的 homerooms.json
         let jsonUrl = csvUrl.replace('teacher_timetable_matrix', 'homerooms_11402')
