@@ -10,6 +10,9 @@ const CONFIG = {
         '115-1': './teacher_11501.csv',
     },
 
+    // ── 綁課 JSON 路徑 ─────────────────────────────────────────
+    LOCKED_COURSES_URL: './locked_courses.json',
+
     // ── 學校資訊 ─────────────────────────────────────────────
     SCHOOL_NAME: '民雄國中',
     SCHOOL_SUBTITLE: '課表查詢系統',

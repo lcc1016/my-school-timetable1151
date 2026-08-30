@@ -10,6 +10,27 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* 綁課儲存格背景警示色 */
+        .td-cell.cell-locked {
+            background-color: #fff3f3 !important;
+            border: 1px solid #ffcccb;
+        }
+
+        /* 🔒 綁課 Badge 標籤 */
+        .lock-tag {
+            display: inline-block;
+            background-color: #e63946;
+            color: #ffffff;
+            font-size: 0.72rem;
+            padding: 1px 5px;
+            border-radius: 4px;
+            margin-left: 4px;
+            vertical-align: middle;
+            font-weight: bold;
+            line-height: 1.2;
+        }
+    </style>
 </head>
 <body>
 
@@ -70,25 +91,25 @@
             <div id="panelClass" class="tab-panel">
                 <div class="grade-group">
                     <div class="grade-label grade-7">七年級</div>
-                    <select id="sel7" class="form-control grade-select" onchange="onGradeSelect(this,'8','9','sp')">
+                    <select id="sel7" class="form-control grade-select">
                         <option value="">— 選擇班級 —</option>
                     </select>
                 </div>
                 <div class="grade-group">
                     <div class="grade-label grade-8">八年級</div>
-                    <select id="sel8" class="form-control grade-select" onchange="onGradeSelect(this,'7','9','sp')">
+                    <select id="sel8" class="form-control grade-select">
                         <option value="">— 選擇班級 —</option>
                     </select>
                 </div>
                 <div class="grade-group">
                     <div class="grade-label grade-9">九年級</div>
-                    <select id="sel9" class="form-control grade-select" onchange="onGradeSelect(this,'7','8','sp')">
+                    <select id="sel9" class="form-control grade-select">
                         <option value="">— 選擇班級 —</option>
                     </select>
                 </div>
                 <div class="grade-group">
                     <div class="grade-label grade-sp">特殊班</div>
-                    <select id="selSp" class="form-control grade-select" onchange="onGradeSelect(this,'7','8','9')">
+                    <select id="selSp" class="form-control grade-select">
                         <option value="">— 選擇班級 —</option>
                     </select>
                 </div>

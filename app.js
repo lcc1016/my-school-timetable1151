@@ -8,6 +8,7 @@
 /* ── 全域狀態 ─────────────────────────────────────────────── */
 let scheduleData    = [];   // CSV 全部資料
 let homeroomData    = {};   // 導師資料 JSON
+let lockedData      = {};   // 📌 綁課資料 JSON
 let isLoggedIn      = false;
 let navHistory      = [];   // 導航歷史 [{type, value}]
 let classGroups     = {};   // 班級分類
@@ -56,6 +57,7 @@ function logout() {
     isLoggedIn   = false;
     scheduleData = [];
     homeroomData = {};
+    lockedData   = {};
     navHistory   = [];
     const errEl  = document.getElementById('loginError');
     if (errEl) errEl.textContent = '';
@@ -117,7 +119,6 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
 
     if (errEl) errEl.textContent = '';
 
-    // 安全取得選取的學期（如果選單還沒載入，自動抓 CONFIG 裡的第一個 key）
     let semLabel = '';
     if (semSelect && semSelect.options && semSelect.options.length > 0) {
         semLabel = semSelect.value;
@@ -144,7 +145,7 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
 });
 
 /* ═══════════════════════════════════════════════════════════
-   CSV 載入與解析 (已修改：強制 UTF-8 解碼與剔除 BOM)
+   CSV 載入與解析 (併入 locked_courses.json 讀取)
 ═══════════════════════════════════════════════════════════ */
 async function fetchAndParseCSV(semLabel) {
     if (loadingOverlay) loadingOverlay.classList.add('show');
@@ -182,6 +183,14 @@ async function fetchAndParseCSV(semLabel) {
             else homeroomData = {};
         } catch (e) { homeroomData = {}; }
 
+        // 📌 讀取 locked_courses.json 綁課資料
+        let lockUrl = (CONFIG && CONFIG.LOCKED_COURSES_URL) ? CONFIG.LOCKED_COURSES_URL : './locked_courses.json';
+        try {
+            const lockRes = await fetch(lockUrl);
+            if (lockRes.ok) lockedData = await lockRes.json();
+            else lockedData = {};
+        } catch (e) { lockedData = {}; }
+
         const parsed  = parseCSV(csvText);
         if (parsed.length === 0) throw new Error('CSV 資料為空');
 
@@ -202,6 +211,21 @@ async function fetchAndParseCSV(semLabel) {
         document.getElementById('loginError').textContent =
             `載入失敗：${err.message}。請確認 CSV/JSON 檔案路徑。`;
     }
+}
+
+/* ── 輔助函式：判斷是否綁課 ───────────────────────────────────── */
+function isSubjectLocked(className, subjectName) {
+    if (!className || !subjectName || !lockedData) return false;
+
+    const cleanClass = className.trim();
+    const numClass = className.replace(/\D/g, ''); // 例如 "701"
+    const cleanSubj = normalizeSubject(subjectName);
+
+    // 支援以 "701" 或完整名稱 "七年1班" 比對
+    const rules = lockedData[numClass] || lockedData[cleanClass] || lockedData[className];
+    if (!rules) return false;
+
+    return rules.includes('ALL') || rules.includes(cleanSubj) || rules.includes(subjectName.trim());
 }
 
 /* ── CSV 解析 ─────────────────────────────────────────────── */
@@ -243,7 +267,6 @@ function buildCategories() {
             for (let p of PERIODS) {
                 const classStr = row[`c${d}${p}`];
                 if (classStr) {
-                    // 相容空格與斜線分割的班級
                     classStr.split(/[\s/]+/).forEach(cls => {
                         cls = cls.trim();
                         if (cls) allClasses.add(cls);
@@ -253,7 +276,6 @@ function buildCategories() {
         }
     });
 
-    // 亦加入 homeroomData 中的班級（防漏掉無課班級）
     if (homeroomData) {
         Object.keys(homeroomData).forEach(cls => {
             if (cls && cls.trim()) allClasses.add(cls.trim());
@@ -264,7 +286,6 @@ function buildCategories() {
     
     [...allClasses].sort().forEach(cls => {
         const firstChar = cls.charAt(0);
-        // 只要是 7、8、9 開頭（如 701, 810, 912 或 七年1班）皆歸入對應年級
         if (firstChar === '7' || cls.startsWith('七')) {
             classGroups['七年級'].push(cls);
         } else if (firstChar === '8' || cls.startsWith('八')) {
@@ -276,7 +297,6 @@ function buildCategories() {
         }
     });
 
-    // 排序班級
     ['七年級','八年級','九年級'].forEach(g => {
         classGroups[g].sort((a, b) => {
             const numA = parseInt(a.replace(/\D/g, '')) || 0;
@@ -293,7 +313,6 @@ function buildCategories() {
             for (let p of PERIODS_ALL) {
                 const subj = row[`s${d}${p}`];
                 if (!subj) continue;
-                // 若有斜線多科目則拆開
                 subj.split('/').forEach(s => {
                     const base = normalizeSubject(s);
                     if (base) {
@@ -437,16 +456,20 @@ function displayClassSchedule(className) {
         for (let d = 1; d <= 5; d++) {
             for (let p of PERIODS_ALL) {
                 const classRaw = row[`c${d}${p}`] || '';
-                const classes = classRaw.split(/[\s/]+/); // 切分空格或斜線
+                const classes = classRaw.split(/[\s/]+/);
                 
                 if (classes.includes(className) && row[`s${d}${p}`]) {
                     const key = `${d}-${p}`;
+                    const subj = row[`s${d}${p}`];
+                    const locked = isSubjectLocked(className, subj);
+
                     if (!cells[key]) {
-                        cells[key] = { subject: row[`s${d}${p}`], items: [row.teachername] };
+                        cells[key] = { subject: subj, items: [row.teachername], isLocked: locked };
                     } else {
                         if (!cells[key].items.includes(row.teachername)) {
                             cells[key].items.push(row.teachername);
                         }
+                        if (locked) cells[key].isLocked = true;
                     }
                 }
             }
@@ -471,9 +494,12 @@ function displayTeacherSchedule(teacherName) {
             for (let p of PERIODS_ALL) {
                 if (row[`s${d}${p}`]) {
                     const key = `${d}-${p}`;
+                    const subj = row[`s${d}${p}`];
                     const classRaw = row[`c${d}${p}`] || '';
                     const classes = classRaw.split(/[\s/]+/).filter(x => x);
-                    cells[key] = { subject: row[`s${d}${p}`], items: classes };
+                    const locked = classes.some(cls => isSubjectLocked(cls, subj));
+
+                    cells[key] = { subject: subj, items: classes, isLocked: locked };
                 }
             }
         }
@@ -538,8 +564,11 @@ function renderCell(cell, mode) {
         }
     }).join(' ');
 
-    return `<td class="td-cell">
-        <div class="cell-subject">${cell.subject}</div>
+    const lockBadge = cell.isLocked ? `<span class="lock-tag" title="此課程已綁定，不可調課">🔒 綁課</span>` : '';
+    const cellClass = cell.isLocked ? 'td-cell cell-locked' : 'td-cell';
+
+    return `<td class="${cellClass}">
+        <div class="cell-subject">${cell.subject} ${lockBadge}</div>
         <div class="cell-items-container">${itemsHtml}</div>
     </td>`;
 }
@@ -574,6 +603,17 @@ function printSchedule() {
   .cell-subject { font-weight:500; }
   .cell-link { font-size:8.5pt; color:#444; }
   .td-empty { background:#fafafa; }
+  .td-cell.cell-locked { background-color: #fff3f3; }
+  .lock-tag {
+      display: inline-block;
+      background-color: #e63946;
+      color: #ffffff;
+      font-size: 0.7rem;
+      padding: 1px 4px;
+      border-radius: 3px;
+      margin-left: 3px;
+      font-weight: bold;
+  }
 </style>
 </head><body>
 <h2>${title}</h2>
