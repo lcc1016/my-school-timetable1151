@@ -1,583 +1,730 @@
 /* ============================================================
-   隤脰”?亥岷蝟餌絞 - 銝餅見撘?   style.css
+   課表查詢系統 - 完整主樣式表 (style.css)
+   民雄國中
    ============================================================ */
 
-/* ?? Google Font ???????????????????????????????????????????? */
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap');
-
-/* ?? CSS 霈 ??????????????????????????????????????????????? */
-:root {
-    --bg-from:    #f0f9ff;
-    --bg-via:     #e0f2fe;
-    --bg-to:      #bae6fd;
-    --glass-bg:   rgba(255, 255, 255, 0.7);
-    --glass-bdr:  rgba(255, 255, 255, 0.9);
-    --glass-blur: blur(20px);
-    --accent:     #0284c7;
-    --accent-dim: rgba(2, 132, 199, 0.15);
-    --accent2:    #4f46e5;
-    --text:       #1e293b;
-    --text-primary: #0f172a;
-    --text-dim:   #475569;
-    --danger:     #ef4444;
-    --success:    #22c55e;
-    --warn:       #eab308;
-    --card-radius:1rem;
-    --transition: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-    --shadow-lg:  0 25px 50px rgba(0,0,0,0.4);
-    --shadow-md:  0 10px 25px rgba(0,0,0,0.25);
+/* ── 全域變數設定 ───────────────────────────────────────── */
+:root { /* 定義 CSS 全域變數根節點，方便全站統一維護顏色 */
+    --primary-color: #0284c7;      /* 設定主視覺天藍色 */
+    --primary-hover: #0369a1;      /* 設定主視覺按鈕懸停時的深藍色 */
+    --amber-color: #d97706;        /* 設定次要提醒與該班其他科目的主題橘色 */
+    --amber-hover: #b45309;        /* 設定橘色按鈕懸停時的深橘色 */
+    --bg-color: #e0f2fe;            /* 設定整體網頁的淡藍色背景 */
+    --card-bg: #ffffff;            /* 設定白色卡片容器背景色 */
+    --text-color: #1f2937;          /* 設定主要文字為深灰色 */
+    --text-dim: #6b7280;           /* 設定次要/淡化文字為中灰色 */
+    --border-color: #e2e8f0;       /* 設定通用邊框為淺灰色 */
+    --locked-bg: #fff1f2;          /* 設定綁課儲存格的淡粉紅色背景 */
+    --locked-border: #fca5a5;      /* 設定綁課儲存格的粉紅邊框 */
+    --locked-text: #ef4444;        /* 設定綁課提示文字為鮮紅色 */
+    --lunch-bg: #f0fdf4;           /* 設定午休/午餐時間的淡綠色背景 */
+    --lunch-text: #15803d;         /* 設定午休/午餐時間的深綠色文字 */
 }
 
-/* ?? Reset & Base ??????????????????????????????????????????? */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-html { scroll-behavior: smooth; }
-
-body {
-    font-family: 'Noto Sans TC', sans-serif;
-    min-height: 100vh;
-    background: linear-gradient(135deg, var(--bg-from) 0%, var(--bg-via) 50%, var(--bg-to) 100%);
-    background-attachment: fixed;
-    color: var(--text);
-    overflow-x: hidden;
+* { /* 選取頁面上所有的 HTML 元素 */
+    box-sizing: border-box; /* 確保 padding 與 border 不會增加元素的總寬高 */
+    margin: 0;              /* 清除所有元素的預設外邊距 */
+    padding: 0;             /* 清除所有元素的預設內邊距 */
 }
 
-/* ?? ???蝎? ???????????????????????????????????????????? */
-body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background:
-        radial-gradient(ellipse 80% 60% at 20% 10%, rgba(2,132,199,0.1) 0%, transparent 60%),
-        radial-gradient(ellipse 60% 80% at 80% 80%, rgba(79,70,229,0.1) 0%, transparent 60%);
-    pointer-events: none;
-    z-index: 0;
+body { /* 設定網頁主體的整體樣式 */
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans TC", sans-serif; /* 設定跨平臺優先使用的無襯線字型 */
+    background-color: var(--bg-color); /* 套用全域變數的淡藍色背景 */
+    color: var(--text-color);           /* 套用全域變數的主要文字顏色 */
+    line-height: 1.5;                   /* 設定全站行高為 1.5 倍字體高度 */
+    padding: 15px;                      /* 設定網頁四周邊距為 15 像素 */
+    min-height: 100vh;                  /* 設定最小高度為視窗的 100% 高度 */
 }
 
-/* ?? ?餌??∠? ??????????????????????????????????????????????? */
-.glass-card {
-    background: var(--glass-bg);
-    border: 1px solid var(--glass-bdr);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
-    border-radius: var(--card-radius);
-    box-shadow: var(--shadow-lg);
+/* ── 載入中遮罩 ─────────────────────────────────────────── */
+.loading-overlay { /* 設定全螢幕資料載入中遮罩容器 */
+    display: none;                         /* 預設隱藏不顯示 */
+    position: fixed;                       /* 使用固定定位覆蓋整個螢幕 */
+    top: 0;                                /* 頂部貼齊螢幕 */
+    left: 0;                               /* 左側貼齊螢幕 */
+    width: 100vw;                          /* 寬度佔滿 100% 視窗寬度 */
+    height: 100vh;                         /* 高度佔滿 100% 視窗高度 */
+    background: rgba(255, 255, 255, 0.85); /* 設定半透明白色背景 */
+    z-index: 10000;                        /* 設定極高的層級以確保蓋在最上層 */
+    align-items: center;                   /* 垂直居中對齊內部元素 */
+    justify-content: center;               /* 水平居中對齊內部元素 */
+    flex-direction: column;                /* 讓內部元素垂直排列 */
+    gap: 12px;                             /* 設定內部元素之間的間距為 12 像素 */
+    font-weight: bold;                     /* 設定載入文字為粗體 */
 }
 
-/* ?? 閬?摰孵 ??????????????????????????????????????????????? */
-.view {
-    position: relative;
-    z-index: 1;
-    display: none;
-    opacity: 0;
-    transform: translateY(16px);
-    transition: opacity var(--transition), transform var(--transition);
-}
-.view.active {
-    display: flex;
-    animation: fadeUp var(--transition) forwards;
-}
-.view.result-active {
-    display: block;
-    animation: fadeUp var(--transition) forwards;
-}
-@keyframes fadeUp {
-    to { opacity: 1; transform: translateY(0); }
+.loading-overlay.show { /* 當載入遮罩包含 show 類別時的狀態 */
+    display: flex !important; /* 強制切換為 Flex 佈局以顯示遮罩 */
 }
 
-/* ?? ?餃 & ?亥岷閬? (?蝵桐葉) ????????????????????????????? */
-#loginView, #queryView {
-    min-height: 100vh;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem 1rem;
+.spinner { /* 設定加載中的轉圈圈圖示 */
+    width: 40px;                                  /* 設定轉圈圖示寬度為 40 像素 */
+    height: 40px;                                 /* 設定轉圈圖示高度為 40 像素 */
+    border: 4px solid #f3f3f3;                    /* 設定底層圓環為淺灰色實線邊框 */
+    border-top: 4px solid var(--primary-color);  /* 設定頂部圓環為主視覺藍色實線邊框 */
+    border-radius: 50%;                          /* 設定為圓形 */
+    animation: spin 1s linear infinite;          /* 套用 spin 動畫，1 秒一圈無限循環 */
 }
 
-/* ?? ?餃?∠? ??????????????????????????????????????????????? */
-.login-card {
-    width: 100%;
-    max-width: 420px;
-    padding: 2.5rem 2rem;
+@keyframes spin { /* 定義轉圈圈旋轉動畫 Keyframes */
+    0% { transform: rotate(0deg); }     /* 動畫起始狀態：旋轉 0 度 */
+    100% { transform: rotate(360deg); } /* 動畫結束狀態：旋轉 360 度 */
 }
 
-.login-logo {
-    text-align: center;
-    margin-bottom: 1.5rem;
-}
-.login-logo .logo-icon {
-    width: 64px; height: 64px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    border-radius: 16px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 2rem;
-    margin-bottom: 0.75rem;
-    box-shadow: 0 8px 24px rgba(56,189,248,0.3);
-}
-.login-logo h1 {
-    font-size: 1.4rem;
-    font-weight: 700;
-    color: var(--text);
-}
-.login-logo p {
-    font-size: 0.85rem;
-    color: var(--text-dim);
-    margin-top: 0.2rem;
+/* ── 視圖切換 (View Containers) ─────────────────────────── */
+.view-container { /* 設定頁面視圖的主要容器 */
+    display: none;          /* 預設隱藏所有視圖 */
+    width: 100%;            /* 寬度佔滿 100% */
+    max-width: 900px;       /* 設定最大寬度限制為 900 像素 */
+    margin: 20px auto;      /* 上下外邊距 20 像素，左右自動置中 */
+    justify-content: center;/* 水平居中對齊內部內容 */
 }
 
-/* ?? 銵典?辣 ??????????????????????????????????????????????? */
-.form-group { margin-bottom: 1.1rem; }
-.form-group label {
-    display: block;
-    font-size: 0.82rem;
-    font-weight: 500;
-    color: var(--text-dim);
-    margin-bottom: 0.4rem;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-}
-.form-control {
-    width: 100%;
-    padding: 0.65rem 0.9rem;
-    background: rgba(255,255,255,0.8);
-    border: 1px solid rgba(0,0,0,0.1);
-    border-radius: 0.6rem;
-    color: var(--text-primary);
-    font-family: inherit;
-    font-size: 1rem;
-    transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
-    outline: none;
-}
-.form-control:focus {
-    border-color: var(--accent);
-    background: #fff;
-    box-shadow: 0 0 0 3px var(--accent-dim);
-}
-.form-control::placeholder { color: var(--text-dim); }
-.form-control option { background: #fff; color: var(--text-primary); }
-
-/* ?? ?? ??????????????????????????????????????????????????? */
-.btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.45rem;
-    padding: 0.65rem 1.4rem;
-    border: none;
-    border-radius: 0.6rem;
-    font-family: inherit;
-    font-size: 0.95rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all var(--transition);
-    text-decoration: none;
-    white-space: nowrap;
-}
-.btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-.btn-primary {
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    color: #fff;
-    box-shadow: 0 4px 16px rgba(56,189,248,0.25);
-}
-.btn-primary:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(56,189,248,0.4);
+.view-container.active { /* 當視圖被設定為當前活動頁面時 */
+    display: flex; /* 切換為 Flex 佈局以顯示頁面 */
 }
 
-.btn-success {
-    background: linear-gradient(135deg, #10b981, #059669);
-    color: #fff;
-    box-shadow: 0 4px 16px rgba(16,185,129,0.25);
-}
-.btn-success:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(16,185,129,0.4);
+.view-container.result-active { /* 當呈現課表結果頁面時 */
+    display: block;    /* 切換為 Block 區塊佈局 */
+    max-width: 1100px; /* 拓寬最大寬度至 1100 像素以容納課表表格 */
 }
 
-.btn-ghost {
-    background: transparent;
-    color: var(--text-dim);
-    border: 1px solid var(--glass-bdr);
-}
-.btn-ghost:hover {
-    background: rgba(255,255,255,0.08);
-    color: var(--text);
-    border-color: rgba(255,255,255,0.2);
+.hidden { /* 強制隱藏元素的工具類別 */
+    display: none !important; /* 強制不顯示該元素 */
 }
 
-.btn-print {
-    background: rgba(251,191,36,0.15);
-    color: var(--warn);
-    border: 1px solid rgba(251,191,36,0.3);
-}
-.btn-print:hover {
-    background: rgba(251,191,36,0.25);
-    transform: translateY(-1px);
-}
-
-.btn-block { width: 100%; }
-
-/* ?? Spinner ???????????????????????????????????????????????? */
-.spinner {
-    width: 18px; height: 18px;
-    border: 2px solid rgba(255,255,255,0.3);
-    border-top-color: #fff;
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-    display: none;
-}
-.spinner.show { display: block; }
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* ?? 霅血?閮 ??????????????????????????????????????????????? */
-.alert {
-    padding: 0.7rem 1rem;
-    border-radius: 0.6rem;
-    font-size: 0.875rem;
-    margin-top: 0.75rem;
-    display: none;
-}
-.alert.show { display: block; }
-.alert-danger  { background: rgba(248,113,113,0.12); border: 1px solid rgba(248,113,113,0.3); color: var(--danger); }
-.alert-warning { background: rgba(251,191,36,0.12);  border: 1px solid rgba(251,191,36,0.3);  color: var(--warn);   }
-.alert-info    { background: rgba(56,189,248,0.12);  border: 1px solid rgba(56,189,248,0.3);  color: var(--accent); }
-
-/* ?? ??蝺?????????????????????????????????????????????????? */
-.divider {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin: 1rem 0;
-    color: var(--text-dim);
-    font-size: 0.8rem;
-}
-.divider::before, .divider::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--glass-bdr);
+/* ── 卡片容器樣式 ───────────────────────────────────────── */
+.login-card, .query-card, .result-card { /* 登入、查詢與結果卡片共同樣式 */
+    background: var(--card-bg);                 /* 設定白色卡片背景 */
+    padding: 30px;                               /* 設定卡片內部邊距為 30 像素 */
+    border-radius: 16px;                        /* 設定 16 像素的大圓角 */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); /* 設定輕微的卡片陰影效果 */
+    width: 100%;                                /* 寬度佔滿父容器 */
 }
 
-/* ?? ?亥岷?∠? ??????????????????????????????????????????????? */
-.query-card {
-    width: 100%;
-    max-width: 480px;
-    padding: 2.5rem 2rem;
-}
-.query-card h2 {
-    font-size: 1.25rem;
-    font-weight: 700;
-    text-align: center;
-    margin-bottom: 1.5rem;
-    color: var(--text);
+.login-card { /* 登入卡片專屬樣式 */
+    max-width: 400px;   /* 限制登入卡片最大寬度為 400 像素 */
+    text-align: center; /* 卡片內部文字置中 */
 }
 
-/* ?? 蝯?閬? ??????????????????????????????????????????????? */
-#resultView {
-    padding: 1.5rem 1rem 3rem;
-}
-.result-inner {
-    max-width: 1100px;
-    margin: 0 auto;
+.system-title { /* 系統主標題文字樣式 */
+    font-size: 1.5rem;    /* 設定字體大小為 1.5rem */
+    margin-bottom: 6px;   /* 設定下外邊距為 6 像素 */
+    color: #1e293b;       /* 設定標題顏色為深藍灰 */
 }
 
-/* ?? Action Bar ????????????????????????????????????????????? */
-.action-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 1.25rem;
-    gap: 0.75rem;
-    flex-wrap: wrap;
+.system-subtitle { /* 系統副標題文字樣式 */
+    font-size: 0.9rem;      /* 設定字體大小為 0.9rem */
+    color: var(--text-dim); /* 套用淡化灰色文字 */
+    margin-bottom: 24px;    /* 設定下外邊距為 24 像素 */
 }
-.action-bar-left { display: flex; align-items: center; gap: 0.75rem; }
-.action-bar-right { display: flex; gap: 0.5rem; }
 
-/* ?? 隤脰”璅? ??????????????????????????????????????????????? */
+/* ── 表單控制元件 ───────────────────────────────────────── */
+.form-group { /* 表單輸入群組容器 */
+    margin-bottom: 16px; /* 設定下外邊距為 16 像素 */
+    text-align: left;    /* 內部文字靠左對齊 */
+}
+
+.form-group label { /* 表單標籤樣式 */
+    display: block;     /* 轉為區塊元素獨立一行 */
+    font-size: 1rem;    /* 設定字體大小為 1rem */
+    font-weight: 600;   /* 設定字體加粗 */
+    margin-bottom: 6px; /* 設定下外邊距為 6 像素 */
+    color: #334155;     /* 設定文字顏色為深灰色 */
+}
+
+.form-control { /* 下拉選單與輸入框通用的控制樣式 */
+    width: 100%;                            /* 寬度佔滿容器 */
+    padding: 10px 12px;                     /* 設定上下邊距 10 像素、左右邊距 12 像素 */
+    font-size: 1.1rem;                      /* 設定字體大小為 1.1rem */
+    border: 1px solid var(--border-color);  /* 設定淺灰邊框 */
+    border-radius: 6px;                     /* 設定 6 像素邊框圓角 */
+    outline: none;                          /* 移除原生聚焦外框 */
+    background-color: #fff;                 /* 設定背景色為白色 */
+    transition: border-color 0.2s;          /* 設定邊框顏色轉場動畫為 0.2 秒 */
+}
+
+.form-control:focus { /* 輸入框獲得焦點時的樣式 */
+    border-color: var(--primary-color); /* 將邊框顏色切換為主視覺藍色 */
+}
+
+.error-msg { /* 錯誤訊息文字樣式 */
+    color: #ef4444;      /* 設定文字為紅色 */
+    font-size: 0.85rem;  /* 設定字體大小為 0.85rem */
+    margin: 8px 0;       /* 設定上下外邊距為 8 像素 */
+    min-height: 1.2em;   /* 設定最小高度避免出現訊息時造成畫面跳動 */
+}
+
+/* ── 按鈕系統 ───────────────────────────────────────────── */
+.btn { /* 通用按鈕基礎樣式 */
+    display: inline-flex;          /* 設定為行內 Flex 佈局 */
+    align-items: center;          /* 垂直居中對齊按鈕內容 */
+    justify-content: center;       /* 水平居中對齊按鈕內容 */
+    padding: 9px 18px;              /* 設定內邊距：上下 9 像素、左右 18 像素 */
+    font-size: 1.1rem;              /* 設定字體大小為 1.1rem */
+    font-weight: 500;              /* 設定中等字體粗細 */
+    border-radius: 6px;            /* 設定 6 像素圓角 */
+    border: 1px solid transparent; /* 預設透明邊框 */
+    cursor: pointer;               /* 滑鼠移入時顯示手型游標 */
+    transition: all 0.2s ease;     /* 設定所有屬性轉場平滑動畫為 0.2 秒 */
+}
+
+.btn-block { /* 區塊型按鈕類別 */
+    width: 100%; /* 寬度設定為 100% 佔滿容器 */
+}
+
+.btn-primary { /* 主要按鈕樣式 */
+    background-color: var(--primary-color); /* 套用主視覺藍色背景 */
+    color: #ffffff;                          /* 設定文字顏色為白色 */
+}
+
+.btn-primary:hover { /* 主要按鈕滑鼠懸停狀態 */
+    background-color: var(--primary-hover); /* 切換為懸停深藍色背景 */
+}
+
+.btn-secondary { /* 次要按鈕樣式 */
+    background-color: #64748b; /* 設定灰藍色背景 */
+    color: #ffffff;            /* 設定文字顏色為白色 */
+}
+
+.btn-secondary:hover { /* 次要按鈕滑鼠懸停狀態 */
+    background-color: #475569; /* 切換為更深的灰藍色背景 */
+}
+
+.btn-outline { /* 外框型按鈕樣式 */
+    border-color: #cbd5e1;  /* 設定邊框顏色為淺灰色 */
+    background-color: #fff; /* 設定背景為白色 */
+    color: #334155;         /* 設定文字顏色為深灰色 */
+}
+
+.btn-outline:hover { /* 外框型按鈕滑鼠懸停狀態 */
+    background-color: #f8fafc; /* 切換為極淺灰色背景 */
+}
+
+.btn-outline-danger { /* 紅色外框型按鈕樣式 */
+    border-color: #fca5a5; /* 設定邊框顏色為粉紅色 */
+    color: #dc2626;        /* 設定文字顏色為紅色 */
+    background: #fff;      /* 設定背景為白色 */
+}
+
+.btn-outline-danger:hover { /* 紅色外框按鈕滑鼠懸停狀態 */
+    background-color: #fef2f2; /* 切換為淡粉紅背景 */
+}
+
+.btn-sm { /* 小型按鈕樣式 */
+    padding: 4px 10px;  /* 縮小內邊距：上下 4 像素、左右 10 像素 */
+    font-size: 0.82rem; /* 縮小字體大小為 0.82rem */
+}
+
+.mt-3 { /* 上外邊距工具類別 */
+    margin-top: 1rem; /* 設定頂部外邊距為 1rem */
+}
+
+/* ── 查詢頁 Tab 頁籤與網格 ──────────────────────────────── */
+.header-bar { /* 查詢頁標頭列 */
+    display: flex;                         /* 使用 Flex 佈局 */
+    justify-content: space-between;        /* 左右兩端對齊內容 */
+    align-items: center;                   /* 垂直居中對齊內容 */
+    margin-bottom: 20px;                   /* 設定下外邊距為 20 像素 */
+    padding-bottom: 12px;                  /* 設定下內邊距為 12 像素 */
+    border-bottom: 1px solid var(--border-color); /* 設定底部淺灰分隔線 */
+}
+
+.semester-badge { /* 學期標籤膠囊 */
+    background-color: #e0f2fe; /* 設定淡藍色背景 */
+    color: #0369a1;            /* 設定深藍色文字 */
+    padding: 4px 12px;         /* 設定內邊距：上下 4 像素、左右 12 像素 */
+    border-radius: 20px;       /* 設定高度圓角呈現膠囊狀 */
+    font-size: 0.85rem;        /* 設定字體大小為 0.85rem */
+    font-weight: 600;          /* 設定字體加粗 */
+}
+
+.tab-header { /* 頁籤切換按鈕容器 */
+    display: flex;                         /* 使用 Flex 佈局橫排頁籤 */
+    gap: 8px;                              /* 設定頁籤之間的間距為 8 像素 */
+    margin-bottom: 20px;                   /* 設定下外邊距為 20 像素 */
+    border-bottom: 2px solid var(--border-color); /* 設定底部基底淺灰線條 */
+}
+
+.tab-btn { /* 頁籤切換按鈕 */
+    padding: 10px 20px;                    /* 設定內邊距：上下 10 像素、左右 20 像素 */
+    border: none;                          /* 移除邊框 */
+    background: none;                      /* 移除背景 */
+    font-size: 1.2rem;                     /* 設定字體大小為 1.2rem */
+    font-weight: 600;                      /* 設定字體加粗 */
+    color: var(--text-dim);                /* 套用未選取時的淡化灰色 */
+    cursor: pointer;                       /* 設定游標為手型 */
+    border-bottom: 3px solid transparent; /* 預設透明底部指引線 */
+    margin-bottom: -2px;                  /* 向下壓 2 像素覆蓋父容器的底部邊框 */
+}
+
+.tab-btn.active { /* 活動中的選取頁籤樣式 */
+    color: var(--primary-color);        /* 設定文字顏色為主視覺藍色 */
+    border-bottom-color: var(--primary-color); /* 設定底部指示線為主視覺藍色 */
+}
+
+.query-grid { /* 網格排版 1：自動適應多欄 */
+    display: grid;                                          /* 使用 Grid 網格佈局 */
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* 自動填滿欄位，最小寬度 180 像素 */
+    gap: 16px;                                              /* 設定網格間距為 16 像素 */
+}
+
+.query-grid-2 { /* 網格排版 2：較寬的欄位 */
+    display: grid;                                          /* 使用 Grid 網格佈局 */
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); /* 自動填滿欄位，最小寬度 240 像素 */
+    gap: 16px;                                              /* 設定網格間距為 16 像素 */
+}
+
+/* ── 課表結果頁標頭與導師資訊對齊 ───────────────────────── */
+.action-bar { /* 操作按鈕工具列容器 */
+    display: flex;                  /* 使用 Flex 佈局 */
+    justify-content: space-between; /* 左右端對齊按鈕 */
+    align-items: center;            /* 垂直置中 */
+    margin-bottom: 16px;            /* 設定下外邊距為 16 像素 */
+    gap: 10px;                      /* 設定元素間距 10 像素 */
+}
+
+.title-header-container { /* 課表標題與導師資訊相對定位容器 */
+    position: relative;     /* 設定相對定位，供內部導師資訊絕對定位使用 */
+    display: flex;          /* 使用 Flex 佈局 */
+    align-items: center;    /* 垂直置中 */
+    justify-content: center;/* 水平居中置中標題 */
+    margin: 10px 0 20px;    /* 設定上下外邊距 */
+    width: 100%;            /* 寬度佔滿 100% */
+}
+
+/* 班課表名稱：絕對居中 */
 .schedule-title {
-    text-align: center;
-    font-size: 1.6rem;
-    font-weight: 700;
-    margin-bottom: 1.25rem;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    font-size: 1.7rem;  /* 設定大標題字體大小為 1.7rem */
+    font-weight: 800;   /* 設定極粗體 */
+    color: #1d4ed8;     /* 設定標題為藍色 */
+    text-align: center; /* 文字居中對齊 */
+    margin: 0;          /* 清除外邊距 */
 }
 
-/* ?? 隤脰”銵冽 ??????????????????????????????????????????????? */
-.schedule-table {
-    width: 100%;
-    border-collapse: collapse;
-    table-layout: fixed;
-    text-align: center;
+/* 導師資訊：靠右側對齊（置於週五上方） */
+.homeroom-teacher-info {
+    position: absolute;           /* 設定絕對定位定位於標題容器內 */
+    right: 0;                     /* 靠右側對齊 */
+    top: 50%;                     /* 垂直居中於容器中間 */
+    transform: translateY(-50%);  /* 修正垂直偏移量實現完美居中 */
+    font-size: 0.95rem;           /* 設定字體大小為 0.95rem */
+    font-weight: 600;             /* 設定字體粗體 */
+    color: #475569;               /* 設定文字顏色為深灰色 */
+    background-color: #f1f5f9;    /* 設定淡灰色背景 */
+    padding: 4px 12px;            /* 設定內邊距：上下 4 像素、左右 12 像素 */
+    border-radius: 6px;           /* 設定 6 像素圓角 */
+    white-space: nowrap;          /* 強制文字不換行 */
 }
-.schedule-table th, .schedule-table td {
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    padding: 0.6rem 0.3rem;
+
+/* ── 課表表格結構與橫向滾動 ─────────────────────────────── */
+.table-responsive { /* 課表表格響應式滾動容器 */
+    width: 100%;                            /* 寬度佔滿 100% */
+    overflow-x: auto;                       /* 當內容過寬時顯示橫向滾動條 */
+    -webkit-overflow-scrolling: touch;      /* 優化 iOS 行動裝置的滑動流暢度 */
+    border-radius: 12px;                    /* 設定表格外框圓角 12 像素 */
+    border: 1px solid var(--border-color); /* 設定外框灰色實線 */
+}
+
+.schedule-table { /* 課表主表格樣式 */
+    width: 100%;               /* 表格寬度佔滿容器 */
+    border-collapse: collapse; /* 合併相鄰的單元格邊框 */
+    table-layout: fixed;       /* 固定表格欄位寬度，由第一列控制 */
+    background-color: #ffffff; /* 設定表格背景為白色 */
+    min-width: 650px;          /* 設定最小寬度保障基本排版不被擠壓 */
+}
+
+.schedule-table th,
+.schedule-table td { /* 課表表頭與單元格共同樣式 */
+    border: 1px solid var(--border-color); /* 設定內部單元格淺灰邊框 */
+    padding: 10px 4px;                      /* 設定內邊距：上下 10 像素、左右 4 像素 */
+    text-align: center;                     /* 內容水平置中 */
+    vertical-align: middle;                 /* 內容垂直居中 */
+    box-sizing: border-box;                 /* 包含邊框於計算寬度內 */
+}
+
+.schedule-table th { /* 表頭專屬樣式 */
+    background-color: #f1f5f9; /* 設定表頭背景為淡灰色 */
+    font-weight: 700;          /* 設定表頭字體加粗 */
+    color: #334155;            /* 設定表頭文字顏色 */
+}
+
+.th-period, .td-period { /* 節次欄位（第一欄）專屬樣式 */
+    width: 70px;               /* 設定節次欄位固定寬度為 70 像素 */
+    background-color: #f8fafc; /* 設定微灰白色背景 */
+}
+
+.period-num { /* 節次數字文字樣式 */
+    display: block;    /* 設定為區塊元素獨立一行 */
+    font-weight: 700;   /* 設定字體加粗 */
+    font-size: 1rem;   /* 設定字體大小為 1rem */
+    color: #1e293b;    /* 設定顏色為深灰色 */
+    line-height: 1.2;  /* 設定緊湊行高 */
+}
+
+.period-time { /* 節次對應時間文字樣式 */
+    display: block;    /* 設定為區塊元素獨立一行 */
+    font-size: 1rem;   /* 設定字體大小為 1rem */
+    color: #94a3b8;    /* 設定文字顏色為淺灰色 */
+    line-height: 1.3;  /* 設定行高 1.3 */
+    margin-top: 2px;   /* 設定頂部間距 2 像素 */
+}
+
+/* ── 午餐/午休時間專屬樣式 ─────────────────────────────── */
+.tr-lunch { /* 午餐/午休橫列 */
+    background-color: var(--lunch-bg); /* 設定淡綠/淡藍灰背景 */
+}
+
+.td-lunch { /* 午餐/午休跨欄儲存格 (colspan="5") */
+    background-color: var(--lunch-bg);
+    color: var(--lunch-text);
+    font-weight: 700;
+    font-size: 0.95rem;
+    letter-spacing: 2px; /* 稍微拉開字距提升質感 */
+    padding: 8px 4px;
+    text-align: center;
     vertical-align: middle;
 }
-.schedule-table thead th {
-    background: rgba(0, 0, 0, 0.05);
-    color: var(--text-primary);
-    font-size: 0.9rem;
-    font-weight: 700;
-}
-.th-period {
-    width: 80px;
-}
-.schedule-table tbody tr:nth-child(even) {
-    background: rgba(255, 255, 255, 0.3);
-}
-.schedule-table tbody tr:hover {
-    background: rgba(2, 132, 199, 0.05);
+
+/* ── 課表儲存格與文字樣式 ───────────────────────────────── */
+.td-empty { /* 空白節次儲存格 */
+    background-color: #ffffff; /* 設定背景為純白色 */
 }
 
-/* 蝭甈?cell */
-.td-period {
-    background: rgba(0, 0, 0, 0.02);
-    color: var(--text-dim);
-    white-space: nowrap;
-}
-.period-num {
-    font-weight: 600;
-    font-size: 0.85rem;
-    color: var(--text-primary);
-}
-.period-time {
-    font-size: 0.75rem;
-    line-height: 1.3;
-    margin-top: 0.2rem;
+.td-cell { /* 有課程資訊的儲存格 */
+    height: 100%;              /* 高度佔滿單元格 */
+    background-color: #ffffff; /* 設定背景為純白色 */
 }
 
-/* 隤脩? cell */
-.td-cell {
-    height: 75px;
+.cell-main-info { /* 儲存格主要內容垂直排列容器 */
+    display: flex;          /* 使用 Flex 佈局 */
+    flex-direction: column; /* 垂直方向排列內容 */
+    justify-content: center;/* 垂直居中對齊 */
+    align-items: center;    /* 水平居中對齊 */
+    gap: 5px;               /* 內部元素間距 5 像素 */
 }
 
-/* 隤脩??批捆 */
-.cell-subject {
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 0.5rem;
+.cell-subject { /* 科目名稱字體樣式 */
+    font-weight: 800;   /* 設定極粗字體 */
+    font-size: 0.95rem; /* 設定字體大小 0.95rem */
+    line-height: 1.25;  /* 設定行高 1.25 */
+    color: #0f172a;     /* 設定深黑色科目字體 */
 }
-.cell-items-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-    justify-content: center;
+
+.clickable-subject { /* 可點擊的科目文字 (用於彈出代課選單) */
+    cursor: pointer !important;    /* 強制顯示手型游標 */
+    transition: opacity 0.2s ease; /* 設定透明度過渡動畫 */
 }
+
+.clickable-subject:hover { /* 可點擊科目滑鼠懸停 */
+    opacity: 0.75; /* 滑鼠懸停時半透明效果 */
+}
+
+.cell-items-container { /* 多個教師/班級標籤容器 */
+    display: flex;          /* 使用 Flex 佈局 */
+    flex-wrap: wrap;        /* 超過寬度時自動換行 */
+    gap: 4px;               /* 標籤之間間距 4 像素 */
+    justify-content: center;/* 水平置中排列 */
+}
+
+/* 教師名字 / 班級名稱（淺色藍方塊底、深藍色字體） */
 .cell-link {
-    display: inline-block;
-    padding: 0.25rem 0.5rem;
-    background: var(--accent-dim);
-    color: var(--accent);
-    border-radius: 4px;
-    font-size: 0.85rem;
-    font-weight: 500;
-    text-decoration: none;
-    transition: all 0.2s ease;
-    cursor: pointer;
-}
-.cell-link:hover {
-    background: var(--accent);
-    color: #fff;
+    display: inline-block;     /* 設定為行內區塊元素 */
+    font-size: 0.82rem;        /* 設定字體大小為 0.82rem */
+    font-weight: 700;          /* 設定粗體 */
+    color: #0284c7;            /* 設定深天藍色文字 */
+    background-color: #e0f2fe; /* 設定淺天藍色背景方塊 */
+    padding: 3px 8px;          /* 設定內邊距：上下 3 像素、左右 8 像素 */
+    border-radius: 6px;        /* 設定圓角方塊 */
+    cursor: pointer;           /* 設定點擊游標 */
+    transition: all 0.15s ease;/* 設定平滑轉場 */
 }
 
-/* 蝛箏? */
-.td-empty {
-    background: transparent;
+.cell-link:hover { /* 連結標籤懸停狀態 */
+    background-color: #bae6fd; /* 加深背景藍色 */
+    color: #0369a1;            /* 加深文字藍色 */
 }
 
-/* ?? Loading Overlay ???????????????????????????????????????? */
-#loadingOverlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(255,255,255,0.85);
-    backdrop-filter: blur(8px);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 1rem;
-    z-index: 100;
-    display: none;
-}
-#loadingOverlay.show { display: flex; }
-#loadingOverlay .big-spinner {
-    width: 48px; height: 48px;
-    border: 3px solid rgba(56,189,248,0.2);
-    border-top-color: var(--accent);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-}
-#loadingOverlay p {
-    color: var(--text-dim);
-    font-size: 0.9rem;
+/* ── 綁課樣式 ───────────────────────────────────────────── */
+.td-cell.cell-locked { /* 被綁定的課表儲存格 */
+    background-color: #fff1f2 !important; /* 強制設定為淡粉紅色背景 */
 }
 
-/* ?? ???內 chip (autocomplete) ??????????????????????????? */
-.suggestions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-    margin-top: 0.5rem;
-    min-height: 0;
-}
-.chip {
-    font-size: 0.78rem;
-    padding: 0.2rem 0.6rem;
-    border-radius: 999px;
-    background: var(--accent-dim);
-    color: var(--accent);
-    border: 1px solid rgba(56,189,248,0.25);
-    cursor: pointer;
-    transition: all var(--transition);
-}
-.chip:hover {
-    background: rgba(56,189,248,0.3);
-    transform: translateY(-1px);
+.lock-tag { /* 綁課標籤樣式 */
+    display: inline-flex;          /* 使用行內 Flex 佈局 */
+    align-items: center;          /* 垂直居中內部圖示與文字 */
+    gap: 2px;                      /* 內部元素間距 2 像素 */
+    background-color: #ef4444;     /* 設定鮮紅色背景 */
+    color: #ffffff;                /* 設定白色文字 */
+    font-size: 0.8rem;             /* 設定字體大小為 0.8rem */
+    padding: 2px 6px;              /* 設定內邊距：上下 2 像素、左右 6 像素 */
+    border-radius: 6px;            /* 設定 6 像素圓角 */
+    margin-left: 4px;              /* 設定左側外邊距 4 像素 */
+    font-weight: bold;             /* 設定粗體 */
+    vertical-align: middle;        /* 垂直與鄰近文字對齊 */
 }
 
-/* ?? ?餃?? ??????????????????????????????????????????????? */
-.logout-btn {
-    font-size: 0.78rem;
-    padding: 0.3rem 0.7rem;
-    border-radius: 0.4rem;
+/* 將綁課標籤的字體大小調整為與科目名稱相同 */
+.bind-tag, 
+.bound-badge, 
+.tag-bind {
+    font-size: inherit !important; /* 繼承父層（科目）的字體大小 */
+    vertical-align: middle;        /* 確保與科目文字垂直對齊 */
 }
 
-/* ?? ??撌亙憿?????????????????????????????????????????????? */
-.hidden { display: none !important; }
-
-/* ?? ?亥岷璅???????????????????????????????????????????????? */
-.query-header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    margin-bottom: 1.25rem;
-}
-.query-header h2 { margin: 0; font-size: 1.2rem; }
-
-.semester-badge {
-    font-size: 0.72rem;
-    color: var(--accent);
-    background: var(--accent-dim);
-    padding: 0.15rem 0.5rem;
-    border-radius: 999px;
-    margin-top: 0.3rem;
-    display: inline-block;
+/* ── 代課教師彈出視窗 (Modal) ────────────────────────────── */
+.modal { /* 彈出視窗背景遮罩容器 */
+    display: none;                      /* 預設隱藏 */
+    position: fixed;                    /* 固定定位蓋住全螢幕 */
+    top: 0;                             /* 貼齊頂部 */
+    left: 0;                            /* 貼齊左側 */
+    width: 100vw;                       /* 佔滿視窗寬度 */
+    height: 100vh;                      /* 佔滿視窗高度 */
+    background-color: rgba(0, 0, 0, 0.4);/* 設定黑色半透明遮罩 */
+    z-index: 9999;                      /* 高層級確保位於畫面上方 */
+    align-items: center;                /* 垂直置中 Modal 卡片 */
+    justify-content: center;            /* 水平置中 Modal 卡片 */
 }
 
-/* ?? ????Tab ?????????????????????????????????????????????? */
-.tab-bar {
-    display: flex;
-    gap: 0.5rem;
-    margin-bottom: 1.25rem;
-    background: rgba(255,255,255,0.04);
-    border-radius: 0.6rem;
-    padding: 0.3rem;
-}
-.tab-btn {
-    flex: 1;
-    padding: 0.55rem 0.5rem;
-    border: none;
-    border-radius: 0.45rem;
-    background: transparent;
-    color: var(--text-dim);
-    font-family: inherit;
-    font-size: 0.9rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all var(--transition);
-}
-.tab-btn:hover { color: var(--text); background: rgba(255,255,255,0.06); }
-.tab-btn.active {
-    background: rgba(56,189,248,0.15);
-    color: var(--accent);
-    box-shadow: 0 2px 8px rgba(56,189,248,0.15);
-}
-.tab-panel { }
-
-/* ?? 撟渡??詨??憛?????????????????????????????????????????????? */
-.grade-group {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 0.65rem;
-}
-.grade-label {
-    flex-shrink: 0;
-    width: 4rem;
-    font-size: 0.8rem;
-    font-weight: 600;
-    text-align: center;
-    padding: 0.25rem 0.4rem;
-    border-radius: 0.4rem;
-}
-.grade-7  { background: rgba(56,189,248,0.15);  color: #38bdf8; }
-.grade-8  { background: rgba(129,140,248,0.15); color: #818cf8; }
-.grade-9  { background: rgba(74,222,128,0.15);  color: #4ade80; }
-.grade-sp { background: rgba(251,191,36,0.15);  color: #fbbf24; }
-.grade-select { flex: 1; }
-
-/* ?? ?踵?撘?????????????????????????????????????????????????? */
-@media (max-width: 640px) {
-    .login-card, .query-card { padding: 2rem 1.25rem; }
-    .schedule-title { font-size: 1.2rem; }
-    .action-bar { flex-direction: column; align-items: flex-start; }
-    .timetable { min-width: 500px; }
-    .timetable thead th { font-size: 0.75rem; padding: 0.6rem 0.3rem; }
-    .cell-subject { font-size: 0.82rem; }
-    .cell-link { font-size: 0.7rem; }
+.modal.show { /* 顯示彈出視窗狀態 */
+    display: flex !important; /* 強制切換為 Flex 以顯示 Modal */
 }
 
-/* ?? ?璅?? ??????????????????????????????????????????????? */
-@media print {
-    body { background: #fff !important; color: #000 !important; }
-    body::before { display: none; }
-    #loginView, #queryView, #loadingOverlay { display: none !important; }
-    .action-bar { display: none !important; }
-    #resultView { display: block !important; opacity: 1 !important; padding: 0 !important; }
-    .result-inner { max-width: 100%; }
-    .glass-card, .table-wrapper { box-shadow: none !important; background: transparent !important; }
+.modal-content { /* 彈出視窗主要白色卡片區塊 */
+    background: #ffffff;                    /* 設定白色背景 */
+    width: 90%;                             /* 預設寬度 90% */
+    max-width: 500px;                       /* 最大寬度限制 500 像素 */
+    border-radius: 16px;                    /* 設定 16 像素圓角 */
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);/* 設定立體浮雕陰影 */
+    overflow: hidden;                       /* 裁切超出圓角的子元素 */
+    animation: modalFadeIn 0.2s ease-out;   /* 套用 Modal 淡入淡出動畫 */
+}
+
+.modal-header { /* Modal 標題列區塊 */
+    padding: 1rem 1.25rem;                  /* 設定內邊距 */
+    background-color: #f8fafc;              /* 設定極淺灰背景 */
+    border-bottom: 1px solid #e2e8f0;      /* 設定底部分隔線 */
+    display: flex;                          /* Flex 佈局 */
+    justify-content: space-between;        /* 標題與關閉按鈕左右對齊 */
+    align-items: center;                   /* 垂直置中 */
+}
+
+.modal-header h3 { /* Modal 標題文字 */
+    margin: 0;          /* 清除預設邊距 */
+    font-size: 1.1rem;  /* 設定字體大小 1.1rem */
+    font-weight: 700;   /* 設定粗體 */
+    color: #0f172a;     /* 設定深黑色文字 */
+}
+
+.modal-close { /* Modal 右上角關閉按鈕 (X) */
+    background: none;   /* 移除背景 */
+    border: none;       /* 移除邊框 */
+    font-size: 1.5rem;  /* 設定放大 X 字體為 1.5rem */
+    cursor: pointer;    /* 設定手型游標 */
+    color: #64748b;     /* 設定灰色 */
+    line-height: 1;     /* 緊湊行高 */
+}
+
+.modal-body { /* Modal 主要內容捲動區域 */
+    padding: 1.25rem;  /* 設定內邊距 */
+    max-height: 65vh;  /* 設定最大高度為視窗高度的 65% */
+    overflow-y: auto;  /* 超出最大高度時自動顯示垂直滾動條 */
+}
+
+/* 基礎標籤樣式 */
+.btn-teacher-tag { /* Modal 內教師名字膠囊按鈕基礎樣式 */
+    padding: 6px 14px;          /* 設定內邊距：上下 6 像素、左右 14 像素 */
+    border-radius: 20px;        /* 圓角膠囊形狀 */
+    font-weight: 600;           /* 設定字體加粗 */
+    font-size: 0.88rem;         /* 設定字體大小 0.88rem */
+    cursor: pointer;            /* 設定手型游標 */
+    transition: all 0.2s ease;  /* 轉場動畫 0.2 秒 */
+    margin: 3px;                /* 間距邊距 3 像素 */
+}
+
+/* 1. 【原科目】空堂教師標籤（淺天藍底深字） */
+.btn-primary-subject {
+    border: 1px solid #7dd3fc;  /* 設定淡藍邊框 */
+    background-color: #e0f2fe; /* 設定淺天藍背景 */
+    color: #0284c7;             /* 設定深天藍文字 */
+}
+
+.btn-primary-subject:hover { /* 原科目教師膠囊懸停 */
+    background-color: #0284c7; /* 切換為實心深藍背景 */
+    color: #ffffff;            /* 切換文字為白色 */
+}
+
+/* 2. 【該班其他科目】空堂教師標籤（暖橘色以利區隔） */
+.btn-other-subject {
+    border: 1px solid #fde68a;  /* 設定淡黃/橘邊框 */
+    background-color: #fffbe2; /* 設定淡黃背景 */
+    color: #d97706;             /* 設定暖橘色文字 */
+}
+
+.btn-other-subject:hover { /* 其他科目教師膠囊懸停 */
+    background-color: #d97706; /* 切換為實心橘色背景 */
+    color: #ffffff;            /* 切換文字為白色 */
+}
+
+@keyframes modalFadeIn { /* 定義 Modal 彈出時淡入與向上滑入的動畫 */
+    from {
+        opacity: 0;                    /* 動畫開始：完全透明 */
+        transform: translateY(-8px);   /* 向上偏移 8 像素 */
+    }
+    to {
+        opacity: 1;                    /* 動畫結束：完全不透明 */
+        transform: translateY(0);      /* 歸位到原位置 */
+    }
+}
+
+/* ── 年級標籤彩色膠囊方框樣式 ─────────────────────────── */
+.form-group label.grade-label { /* 查詢選單年級分類 Label 通用樣式 */
+    display: inline-block; /* 行內區塊元素 */
+    padding: 4px 12px;      /* 設定內邊距 */
+    border-radius: 6px;    /* 設定圓角 */
+    font-weight: 700;      /* 設定粗體 */
+    font-size: 0.9rem;     /* 設定字體大小 */
+    margin-bottom: 8px;    /* 下外邊距 8 像素 */
+}
+
+/* 七年級：淡藍底藍字 */
+.form-group label.grade-7 {
+    background-color: #e0f2fe; /* 設定淡藍背景 */
+    color: #0284c7;            /* 設定藍色文字 */
+}
+
+/* 八年級：淡紫底紫字 */
+.form-group label.grade-8 {
+    background-color: #eef2ff; /* 設定淡紫背景 */
+    color: #6366f1;            /* 設定紫色文字 */
+}
+
+/* 九年級：淡綠底綠字 */
+.form-group label.grade-9 {
+    background-color: #dcfce7; /* 設定淡綠背景 */
+    color: #16a34a;            /* 設定綠色文字 */
+}
+
+/* 特殊班 / 其他：淡黃底黃字 */
+.form-group label.grade-special {
+    background-color: #fef9c3; /* 設定淡黃背景 */
+    color: #ca8a04;            /* 設定黃褐色文字 */
+}
+
+/* ── 行動裝置 RWD (Mobile < 600px 極致優化不裁切模式) ─────── */
+@media screen and (max-width: 600px) { /* 當螢幕寬度小於或等於 600 像素時套用以下響應式規則 */
+    body {
+        padding: 2px !important; /* 極限壓縮手機頁面的四周內邊距為 2 像素 */
+    }
+
+    .container, #resultView, .card, .result-card { /* 大範圍容器適應手機螢幕 */
+        padding-left: 2px !important;  /* 清空左右 padding */
+        padding-right: 2px !important;
+        margin-left: 0 !important;     /* 清空左右 margin */
+        margin-right: 0 !important;
+        width: 100% !important;        /* 滿寬顯示 */
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    /* 頂部導師與標題調整 */
+    .title-header-container {
+        flex-direction: column; /* 改為垂直排列標題與導師資訊 */
+        gap: 4px;               /* 縮小間距為 4 像素 */
+        margin: 5px 0 10px;     /* 縮小外邊距 */
+    }
 
     .schedule-title {
-        font-size: 1.4rem;
-        -webkit-text-fill-color: #000 !important;
-        color: #000 !important;
-        background: none !important;
+        font-size: 1.2rem !important; /* 縮小手機版標題字體至 1.2rem */
     }
 
-    .timetable { min-width: 0; width: 100%; }
-    .timetable thead th {
-        background: #f0f0f0 !important;
-        color: #000 !important;
-        border: 1px solid #aaa !important;
+    .homeroom-teacher-info {
+        position: static;       /* 取消絕對定位，跟隨垂直排列 */
+        transform: none;        /* 取消定位偏移 */
+        font-size: 0.78rem;     /* 縮小導師資訊字體大小 */
+        padding: 2px 8px;       /* 縮小內邊距 */
     }
-    .timetable tbody th,
-    .timetable tbody td {
-        border: 1px solid #aaa !important;
-        color: #000 !important;
-        background: #fff !important;
+
+    #scheduleTableContainer {
+        width: 100% !important;          /* 容器滿寬 */
+        overflow-x: hidden !important;   /* 隱藏橫向滾動條，強制不裁切全擠在螢幕內 */
+        padding: 0 !important;          /* 清空內邊距 */
+        margin: 0 !important;            /* 清空外邊距 */
     }
-    .timetable .time-cell { color: #444 !important; }
-    .cell-subject { color: #000 !important; font-size: 0.9rem; }
+
+    .schedule-table {
+        width: 100% !important;        /* 表格滿寬 */
+        max-width: 100% !important;
+        min-width: 100% !important;    /* 取消桌機版的 650px 限制 */
+        table-layout: fixed !important;/* 強制固寬比計算 */
+        border-collapse: collapse !important;
+    }
+
+    /* 第一欄：節次＋時間（高度壓縮寬度） */
+    .th-period, .td-period {
+        width: 3ch !important;     /* 第一欄寬度壓縮至約僅能容納 3 個字元 */
+        max-width: 3ch !important;
+        padding: 2px 0 !important; /* 清空左右內邊距 */
+    }
+
+    /* 星期一～星期五五個欄位（平均分配剩餘寬度） */
+    .schedule-table th:not(.th-period),
+    .schedule-table td:not(.td-period) {
+        width: calc((100% - 3ch) / 5) !important; /* 計算並等分扣除第一欄後的其餘 5 欄寬度 */
+        padding: 2px 0 !important;               /* 縮小單元格邊距 */
+    }
+
+    /* 午休跨欄儲存格手機版適應 */
+    .td-lunch {
+        font-size: 0.5rem !important;  /* 手機版文字適度縮小 */
+        letter-spacing: 0px !important;  /* 壓縮字距防折行 */
+        padding: 4px 2px !important;    /* 縮小上下邊距 */
+    }
+
+    .schedule-table th,
+    .schedule-table td,
+    .cell-subject,
+    .cell-link,
+    .period-num,
+    .period-time {
+        white-space: normal !important;     /* 允許自動換行 */
+        word-break: break-all !important;   /* 強制極限斷詞與強制換行 */
+        overflow-wrap: break-word !important;/* 允許過長單字強制斷行 */
+        text-align: center !important;      /* 文字保持置中 */
+    }
+
+    .period-num {
+        font-size: 0.76rem !important; /* 手機版節次數字縮小為 0.76rem */
+        font-weight: bold;
+        line-height: 1.2;              /* 行高 1.2 */
+    }
+
+    .period-time {
+        font-size: 0.6rem !important;  /* 手機版節次時間縮小為 0.6rem */
+        color: #64748b;
+        line-height: 0.95;             /* 緊湊行高 0.95 */
+        margin-top: 1px;
+        letter-spacing: -0.5px;        /* 縮小字距以利容納時間字串 */
+    }
+
+    .cell-subject {
+        font-size: 0.7rem !important;  /* 手機版科目名稱縮小為 0.7rem */
+        font-weight: bold;
+        line-height: 1.1;
+    }
+
     .cell-link {
-        color: #000 !important;
-        background: #eee !important;
-        font-size: 0.78rem;
+        font-size: 0.62rem !important; /* 手機版教師/班級連結標籤縮小為 0.62rem */
+        padding: 1px 2px !important;   /* 壓縮標籤內邊距 */
+        line-height: 1.05;
+        margin-top: 1px;
     }
-    .cell-empty { color: #ccc !important; }
-    @page { size: A4 landscape; margin: 0.6in; }
-}
-/* 課表容器 RWD */
-#scheduleTableContainer {
-    width: 100%;
-    overflow-x: auto;
-    margin-top: 1rem;
-    border-radius: 0.5rem;
-    background: var(--glass-bg);
+
+    .lock-tag {
+        display: inline-block !important; /* 改為行內區塊佈局 */
+        font-size: inherit !important;    /* 繼承手機版科目的 0.7rem 字體大小 */
+        padding: 1px 3px !important;      /* 調整內邊距 */
+        margin: 1px 0 0 2px !important;   /* 調整外邊距 */
+        line-height: 1.1;                 /* 緊湊行高 */
+    }
 }
