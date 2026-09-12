@@ -5,6 +5,10 @@
  * ============================================================
  */
 
+/* ── 全域設定 ─────────────────────────────────────────────── */
+// 請替換成你部署好的 Google Apps Script 網址
+const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyymH4_8hdi1SmccV6-m8hMsVJhkdEHDBtci9kluH_gb-37ERTX-JL4OOE_z7od6fSgUw/exec";
+
 /* ── 全域狀態 ─────────────────────────────────────────────── */
 let scheduleData    = [];   // CSV 全部資料
 let homeroomData    = {};   // 導師資料 JSON
@@ -27,6 +31,73 @@ function initDomReferences() {
     loadingOverlay = document.getElementById('loadingOverlay');
     scheduleTitle = document.getElementById('scheduleTitle');
     scheduleTableContainer = document.getElementById('scheduleTableContainer');
+}
+
+/* ═══════════════════════════════════════════════════════════
+    瀏覽統計計數器 (串接 Google Apps Script 後端)
+═══════════════════════════════════════════════════════════ */
+
+/**
+ * 初始化計數器：網頁載入時向 GAS 請求「當月」與「總累計」人數
+ */
+async function initViewCounter() {
+    if (!GAS_WEB_APP_URL || GAS_WEB_APP_URL.includes("YOUR_DEPLOYMENT_ID")) return;
+
+    try {
+        const response = await fetch(`${GAS_WEB_APP_URL}?action=getCounter`);
+        if (!response.ok) throw new Error(`HTTP 錯誤 ${response.status}`);
+        
+        const data = await response.json();
+        console.log("GAS 回傳資料 (init):", data);
+
+        // 相容性處理：同時支援新版 {month, total} 與舊版 {count}
+        const monthVal = (data && data.month !== undefined) ? data.month : 0;
+        const totalVal = (data && data.total !== undefined) ? data.total : (data ? (data.count || 0) : 0);
+
+        updateCounterDisplay(monthVal, totalVal);
+    } catch (err) {
+        console.error('讀取雲端計數器失敗:', err);
+    }
+}
+
+/**
+ * 累加計數器：執行查詢時呼叫，讓 GAS 後端的當月與總計數同時 +1
+ */
+async function incrementViewCounter() {
+    if (!GAS_WEB_APP_URL || GAS_WEB_APP_URL.includes("YOUR_DEPLOYMENT_ID")) return;
+
+    try {
+        const response = await fetch(`${GAS_WEB_APP_URL}?action=increment`);
+        if (!response.ok) throw new Error(`HTTP 錯誤 ${response.status}`);
+        
+        const data = await response.json();
+        console.log("GAS 回傳資料 (increment):", data);
+
+        // 相容性處理：同時支援新版 {month, total} 與舊版 {count}
+        const monthVal = (data && data.month !== undefined) ? data.month : 0;
+        const totalVal = (data && data.total !== undefined) ? data.total : (data ? (data.count || 0) : 0);
+
+        updateCounterDisplay(monthVal, totalVal);
+    } catch (err) {
+        console.error('更新雲端計數器失敗:', err);
+    }
+}
+
+/**
+ * 更新 HTML 畫面上所有計數器位置的數字
+ */
+function updateCounterDisplay(monthTotal, overallTotal) {
+    // 1. 更新當月瀏覽 (對應 ID: monthViews 或 class: month-visitor-count)
+    const monthEls = document.querySelectorAll('#monthViews, .month-visitor-count');
+    monthEls.forEach(el => {
+        if (el) el.textContent = Number(monthTotal || 0).toLocaleString();
+    });
+
+    // 2. 更新總累計瀏覽 (對應 ID: totalViews, visitorCount 或 class: total-visitor-count)
+    const totalEls = document.querySelectorAll('#totalViews, #visitorCount, .total-visitor-count');
+    totalEls.forEach(el => {
+        if (el) el.textContent = Number(overallTotal || 0).toLocaleString();
+    });
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -386,6 +457,7 @@ function submitClassQuery() {
         return;
     }
     navHistory = [];
+    incrementViewCounter(); // 觸發雲端計數器 +1
     displayClassSchedule(cls);
 }
 
@@ -419,6 +491,7 @@ function submitTeacherQuery() {
         return;
     }
     navHistory = [];
+    incrementViewCounter(); // 觸發雲端計數器 +1
     displayTeacherSchedule(teacher);
 }
 
@@ -516,7 +589,6 @@ function buildScheduleTable(cells, mode, currentClassName = '') {
 
     // 2. 正課 1 ~ 8 節 (包含午休)
     for (let p = 1; p <= 8; p++) {
-        // ── 插入午休列（於第 4 節後、第 5 節前） ──
         if (p === 5) {
             const lunchTime = periods['lunch'] || { start: '12:20', end: '13:00' };
             html += `<tr class="tr-break">
@@ -547,7 +619,6 @@ function buildScheduleTable(cells, mode, currentClassName = '') {
 function renderCell(cell, mode, day, period, currentClassName = '') {
     if (!cell) return '<td class="td-empty"></td>';
     
-    // 教師/班級連結
     const itemsHtml = (cell.items || []).map(item => {
         if (mode === 'class') {
             return `<div class="cell-link" onclick="displayTeacherSchedule('${escJsParam(item)}')">${escText(item)}</div>`;
@@ -574,12 +645,11 @@ function renderCell(cell, mode, day, period, currentClassName = '') {
 }
 
 /* ═══════════════════════════════════════════════════════════
-    彈出視窗（Modal）邏輯：查詢該節空堂教師（含同科與該班其他科目）
+    彈出視窗（Modal）邏輯：查詢該節空堂教師
 ═══════════════════════════════════════════════════════════ */
 function showAvailableTeachers(subject, day, period, className) {
     const baseSubject = normalizeSubject(subject);
     
-    // ⬇⬇⬇【排除名單（改用 Set 加快比對速度，並已去重）】⬇⬇⬇
     const EXCLUDED_OTHER_SUBJECT_TEACHERS = new Set([
         "李漢堂", "陳綉燕", "何嘉峻", "蔡宜婷", "周億琳", "張孟傑", "莊宗儒", 
         "許湫萍", "邱順瑜", "陳群靜", "高健雄", "吳瑩娟", "張介凡", "Divina", 
@@ -590,14 +660,12 @@ function showAvailableTeachers(subject, day, period, className) {
         "郭勝綸", "郭泰延", "鄭珮辰", "鄭白苹", "鄭耀宗", "陳國川", "張曼玲"
     ]);
 
-    // 1. 找出當前點擊科目的空堂教師 (主要)
     const primaryTeachers = (subjectTeachers[baseSubject] || []).filter(teacher => {
         const row = scheduleData.find(r => r.teachername === teacher);
         return row && !row[`s${day}${period}`];
     });
 
-    // 2. 找出該班級「所有其他科目」在當節課空堂的任課教師
-    const otherTeachersMap = new Map(); // key: 教師姓名, value: 科目名稱 Set
+    const otherTeachersMap = new Map();
     
     if (className) {
         scheduleData.forEach(row => {
@@ -610,14 +678,12 @@ function showAvailableTeachers(subject, day, period, className) {
                         const subj = row[`s${d}${p}`];
                         const normSubj = normalizeSubject(subj);
                         
-                        // 排除當前科目、排除主要科目教師、且【排除不顯示名單內的教師】
                         if (
                             normSubj && 
                             normSubj !== baseSubject && 
                             !primaryTeachers.includes(row.teachername) &&
                             !EXCLUDED_OTHER_SUBJECT_TEACHERS.has(row.teachername)
                         ) {
-                            // 檢查該教師在該 day/period 是否為空堂
                             if (!row[`s${day}${period}`]) {
                                 if (!otherTeachersMap.has(row.teachername)) {
                                     otherTeachersMap.set(row.teachername, new Set());
@@ -645,7 +711,6 @@ function showAvailableTeachers(subject, day, period, className) {
     if (modalBody) {
         let html = '';
 
-        // 分組 1：同科目空堂教師
         html += `<div class="sub-group-title">【${escText(baseSubject)}】科空堂教師：</div>`;
         if (primaryTeachers.length === 0) {
             html += `<p class="no-teacher-msg">無同科空堂教師</p>`;
@@ -657,7 +722,6 @@ function showAvailableTeachers(subject, day, period, className) {
             html += '</div>';
         }
 
-        // 分組 2：該班其他科目空堂教師
         html += `<div class="sub-group-title mt-3">該班其他科目空堂教師：</div>`;
         if (otherTeachersMap.size === 0) {
             html += `<p class="no-teacher-msg">無其他科目空堂教師</p>`;
@@ -775,6 +839,7 @@ ${tableHTML}
 ═══════════════════════════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', () => {
     initDomReferences();
+    initViewCounter(); // 網頁初始化時讀取雲端瀏覽人數
 
     const schoolName = (typeof CONFIG !== 'undefined' && CONFIG.SCHOOL_NAME) ? CONFIG.SCHOOL_NAME : '民雄國中';
     document.title = `${schoolName} 課表查詢`;

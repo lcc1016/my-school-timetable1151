@@ -5,6 +5,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>課表查詢系統</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* 瀏覽計數器樣式 */
+        .visit-stats-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: #4a5568;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .visit-stats-badge span {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .visit-stats-badge strong {
+            color: #2b6cb0;
+            font-weight: 700;
+        }
+        .app-footer {
+            margin-top: 2rem;
+            text-align: center;
+            font-size: 0.85rem;
+            color: #718096;
+            padding: 10px 0;
+        }
+        .visitor-box {
+            text-align: center;
+            padding: 12px 0;
+            font-size: 0.9rem;
+            color: #4a5568;
+        }
+    </style>
 </head>
 <body>
 
@@ -14,43 +51,68 @@
         <div class="loading-text">資料載入中，請稍候...</div>
     </div>
 
-    <!-- ══ 1. 登入視圖 ══════════════════════════════════════════ -->
-    <div id="loginView" class="view-container active">
-        <div class="login-card">
-            <h1 class="system-title">課表查詢系統</h1>
-            <p class="system-subtitle">請選擇學期並登入查詢</p>
-
-            <form id="loginForm">
-                <div class="form-group">
-                    <label for="semesterSelect">學期選擇</label>
-                    <select id="semesterSelect" class="form-control">
-                        <!-- 由 JS 動態填入 -->
-                    </select>
-                </div>
-
-                <div id="loginError" class="error-msg"></div>
-
-                <button type="submit" id="loginBtn" class="btn btn-primary">
-                    <span id="loginSpinner" class="btn-spinner"></span>
-                    進入系統
-                </button>
-            </form>
+<!-- ══ 1. 登入視圖 ══════════════════════════════════════════ -->
+<div id="loginView" class="view-container active">
+    <!-- 白框卡片區 -->
+    <div class="login-card">
+        <div class="login-header">
+            <img src="logo.png" alt="校徽" class="school-logo">
+            <div class="title-group">
+                <h1 class="system-title">民雄國中<br>課表查詢系統</h1>
+                <p class="system-subtitle">請選擇學期並登入查詢</p>
+            </div>
         </div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="semesterSelect">學期選擇</label>
+                <select id="semesterSelect" class="form-control">
+                    <!-- 由 JS 動態填入 -->
+                </select>
+            </div>
+
+            <div id="loginError" class="error-msg"></div>
+
+            <button type="submit" id="loginBtn" class="btn btn-primary">
+                <span id="loginSpinner" class="btn-spinner"></span>
+                進入系統
+            </button>
+        </form>
     </div>
 
-    <!-- ══ 2. 查詢面板視圖 ══════════════════════════════════════ -->
-    <div id="queryView" class="view-container">
-        <div class="query-card">
-            <div class="header-bar">
+    <!-- 頁尾計數器（放在卡片外、登入視圖內的最下方） -->
+    <footer class="app-footer">
+        <div class="visitor-box">
+            👀 累積瀏覽人次：<span id="visitorCount">0</span>
+        </div>
+    </footer>
+</div>
+
+<!-- ══ 2. 查詢面板視圖 ══════════════════════════════════════ -->
+<div id="queryView" class="view-container">
+    <div class="query-card">
+        <!-- 頂部列：第一行放學期與登出，第二行放流量統計 -->
+        <div class="header-bar">
+            <div class="top-row">
                 <span id="currentSemester" class="semester-badge"></span>
-                <button class="btn btn-outline-danger btn-sm" onclick="logout()">登出</button>
+                <button class="btn btn-outline-danger btn-sm logout-btn" onclick="logout()">登出</button>
             </div>
-
-            <div class="tab-header">
-                <button id="tabClass" class="tab-btn active" onclick="switchTab('class')">班級課表查詢</button>
-                <button id="tabTeacher" class="tab-btn" onclick="switchTab('teacher')">教師課表查詢</button>
+            
+            <div class="stats-row">
+                <div class="visit-stats-badge">
+                    <span>🗓️ 當月瀏覽：<strong id="monthViews">0</strong> 人次</span>
+                    <span class="sep">|</span>
+                    <span>📈 累計瀏覽：<strong id="totalViews">0</strong> 人次</span>
+                </div>
             </div>
+        </div>
 
+        <div class="tab-header" style="margin-top: 15px;">
+            <button id="tabClass" class="tab-btn active" onclick="switchTab('class')">班級課表查詢</button>
+            <button id="tabTeacher" class="tab-btn" onclick="switchTab('teacher')">教師課表查詢</button>
+        </div>
+        
+        <!-- 下方 tab-panel 保持不變 ... -->
             <!-- 班級查詢 Tab -->
             <div id="panelClass" class="tab-panel">
                 <div class="query-grid">
@@ -96,7 +158,6 @@
             </div>
         </div>
     </div>
-
     <!-- ══ 3. 課表結果視圖 ══════════════════════════════════════ -->
     <div id="resultView" class="view-container">
         <div class="result-card">
@@ -131,6 +192,7 @@
         </div>
     </div>
 
+    <!-- 腳本引入 (維持放在 body 最下方) -->
     <script src="config.js"></script>
     <script src="app.js"></script>
 </body>
