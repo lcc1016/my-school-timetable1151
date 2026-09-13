@@ -14,9 +14,11 @@
     --text-color: #1f2937;          /* 主要文字深灰色 */
     --text-dim: #6b7280;           /* 次要/淡化文字中灰色 */
     --border-color: #e2e8f0;       /* 通用邊框淺灰色 */
-    --locked-bg: #fff1f2;          /* 綁課儲存格淡粉紅背景 */
+    --locked-bg: #fff1f2;          /* 正課綁課儲存格淡粉紅背景 */
     --locked-border: #fca5a5;      /* 綁課儲存格粉紅邊框 */
     --locked-text: #ef4444;        /* 綁課提示文字鮮紅色 */
+    --locked-p8-bg: #f3e8ff;       /* 第8節綁課儲存格淡紫色背景 */
+    --locked-p8-text: #7e22ce;     /* 第8節綁課紫色文字 */
     --lunch-bg: #f0fdf4;           /* 午休/午餐時間淡綠背景 */
     --lunch-text: #15803d;          /* 午休/午餐時間深綠文字 */
 }
@@ -288,6 +290,15 @@ body {
     font-weight: 600;
 }
 
+.p8-notice-badge {
+    background-color: #f3e8ff;
+    color: #7e22ce;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
 .visit-stats-badge {
     display: inline-flex;
     align-items: center;
@@ -440,6 +451,10 @@ body {
     margin-top: 2px;
 }
 
+tr.period-8-row {
+    background-color: #faf5ff;
+}
+
 /* ── 午餐/午休時間樣式 ───────────────────────────────────── */
 .tr-lunch {
     background-color: var(--lunch-bg);
@@ -482,7 +497,6 @@ body {
     flex-wrap: wrap;
 }
 
-/* 科目名稱：改用質感深藍灰色，視覺更舒適 */
 .cell-subject {
     font-weight: 800;
     font-size: 0.95rem;
@@ -506,7 +520,6 @@ body {
     justify-content: center;
 }
 
-/* 教師名字 / 班級名稱膠囊框 (微調配色：淡藍灰底 + 深藍字 + 底線) */
 .cell-link,
 .clickable-link,
 .schedule-table td .teacher-link,
@@ -514,12 +527,12 @@ body {
     display: inline-block;
     font-size: 0.82rem;
     font-weight: 600;
-    color: #2563eb;               /* 高質感藍色文字 */
-    background-color: #f1f5f9;    /* 柔和淺藍灰背景 */
+    color: #2563eb;               
+    background-color: #f1f5f9;    
     padding: 3px 8px;
     border-radius: 6px;
-    border: 1px solid #e2e8f0;    /* 淡灰色細邊框 */
-    text-decoration: underline;   /* 底線暗示可點擊 */
+    border: 1px solid #e2e8f0;    
+    text-decoration: underline;   
     cursor: pointer;
     transition: all 0.2s ease;
 }
@@ -528,13 +541,12 @@ body {
 .clickable-link:hover,
 .schedule-table td .teacher-link:hover,
 .schedule-table td .class-link:hover {
-    background-color: #2563eb;    /* 懸停時切換為實心藍底 */
-    color: #ffffff;               /* 切換為白字 */
+    background-color: #2563eb;    
+    color: #ffffff;               
     border-color: #2563eb;
     text-decoration: none;
 }
 
-/* 專科教室標籤樣式 */
 .cell-classroom {
     display: inline-block;
     font-size: 0.78rem;
@@ -547,8 +559,9 @@ body {
 }
 
 /* ── 綁課樣式 ───────────────────────────────────────────── */
+/* 1. 正課綁課 (1-7 節) */
 .td-cell.cell-locked {
-    background-color: #fff1f2 !important;
+    background-color: var(--locked-bg) !important;
 }
 
 .lock-tag {
@@ -563,6 +576,15 @@ body {
     font-weight: bold;
     vertical-align: middle;
     white-space: nowrap;
+}
+
+/* 2. 第 8 節獨立綁課 (紫底區隔) */
+.td-cell.cell-locked-p8 {
+    background-color: var(--locked-p8-bg) !important;
+}
+
+.lock-tag-p8 {
+    background-color: var(--locked-p8-text) !important;
 }
 
 .bind-tag, 
@@ -641,7 +663,6 @@ body {
     margin: 3px;
 }
 
-/* 原科目空堂教師標籤 */
 .btn-primary-subject {
     border: 1px solid #7dd3fc;
     background-color: #e0f2fe;
@@ -653,7 +674,6 @@ body {
     color: #ffffff;
 }
 
-/* 其他科目空堂教師標籤 */
 .btn-other-subject {
     border: 1px solid #fde68a;
     background-color: #fffbe2;
@@ -729,7 +749,7 @@ body {
     margin-left: 4px;
 }
 
-/* ── 行動裝置 RWD (Mobile < 600px 極致優化不裁切模式) ─────── */
+/* ── 行動裝置 RWD ────────────────────────────────────────── */
 @media screen and (max-width: 600px) {
     body {
         padding: 2px !important;
@@ -846,7 +866,7 @@ body {
         margin-top: 1px;
     }
 
-    .lock-tag {
+    .lock-tag, .lock-tag-p8 {
         display: inline-block !important;
         font-size: 0.65rem !important;
         padding: 1px 2px !important;

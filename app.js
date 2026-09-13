@@ -12,7 +12,8 @@ const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyymH4_8hdi1Smc
 /* ── 全域狀態 ─────────────────────────────────────────────── */
 let scheduleData    = [];   // CSV 全部資料
 let homeroomData    = {};   // 導師資料 JSON
-let lockedData      = {};   // 綁課資料 JSON
+let lockedData      = {};   // 1~7 節綁課資料 JSON
+let lockedDataP8    = {};   // 第 8 節獨立綁課資料 JSON
 let isLoggedIn      = false;
 let navHistory      = [];   // 導航歷史 [{type, value}]
 let classGroups     = {};   // 班級分類
@@ -133,6 +134,7 @@ function logout() {
     scheduleData = [];
     homeroomData = {};
     lockedData   = {};
+    lockedDataP8 = {};
     navHistory   = [];
     const errEl   = document.getElementById('loginError');
     if (errEl) errEl.textContent = '';
@@ -220,12 +222,21 @@ async function fetchAndParseCSV(semLabel) {
             else homeroomData = {};
         } catch (e) { homeroomData = {}; }
 
+        // 載入 1~7 節綁課資料
         let lockUrl = (typeof CONFIG !== 'undefined' && CONFIG.LOCKED_COURSES_URL) ? CONFIG.LOCKED_COURSES_URL : './locked_courses.json';
         try {
             const lockRes = await fetch(lockUrl);
             if (lockRes.ok) lockedData = await lockRes.json();
             else lockedData = {};
         } catch (e) { lockedData = {}; }
+
+        // 載入第 8 節獨立綁課資料
+        let lockP8Url = (typeof CONFIG !== 'undefined' && CONFIG.LOCKED_COURSES_P8_URL) ? CONFIG.LOCKED_COURSES_P8_URL : './8locked_courses.json';
+        try {
+            const lockP8Res = await fetch(lockP8Url);
+            if (lockP8Res.ok) lockedDataP8 = await lockP8Res.json();
+            else lockedDataP8 = {};
+        } catch (e) { lockedDataP8 = {}; }
 
         const parsed = parseCSV(csvText);
         if (parsed.length === 0) throw new Error('CSV 資料為空');
@@ -249,15 +260,19 @@ async function fetchAndParseCSV(semLabel) {
     }
 }
 
-/* ── 輔助函式：判斷是否綁課 ───────────────────────────────────── */
-function isSubjectLocked(className, subjectName) {
-    if (!className || !subjectName || !lockedData) return false;
+/* ── 輔助函式：判斷是否綁課 (新增支援第8節獨立邏輯) ───────────────────── */
+function isSubjectLocked(className, subjectName, period) {
+    if (!className || !subjectName) return false;
+
+    // 依據節次選用對應的綁課 JSON 資料源
+    const currentLockData = (period === 8) ? lockedDataP8 : lockedData;
+    if (!currentLockData) return false;
 
     const cleanClass = className.trim();
     const numClass = className.replace(/\D/g, ''); 
     const cleanSubj = normalizeSubject(subjectName);
 
-    const rules = lockedData[numClass] || lockedData[cleanClass] || lockedData[className];
+    const rules = currentLockData[numClass] || currentLockData[cleanClass] || currentLockData[className];
     if (!rules) return false;
 
     return rules.includes('ALL') || rules.includes(cleanSubj) || rules.includes(subjectName.trim());
@@ -510,7 +525,7 @@ function displayClassSchedule(className) {
                 if (classes.includes(className) && row[`s${d}${p}`]) {
                     const key = `${d}-${p}`;
                     const subj = row[`s${d}${p}`];
-                    const locked = isSubjectLocked(className, subj);
+                    const locked = isSubjectLocked(className, subj, p);
 
                     if (!cells[key]) {
                         cells[key] = { subject: subj, items: [row.teachername], isLocked: locked };
@@ -548,7 +563,7 @@ function displayTeacherSchedule(teacherName) {
                     const subj = row[`s${d}${p}`];
                     const classRaw = row[`c${d}${p}`] || '';
                     const classes = classRaw.split(/[\s/]+/).filter(x => x);
-                    const locked = classes.some(cls => isSubjectLocked(cls, subj));
+                    const locked = classes.some(cls => isSubjectLocked(cls, subj, p));
 
                     cells[key] = { subject: subj, items: classes, isLocked: locked };
                 }
@@ -601,7 +616,7 @@ function buildScheduleTable(cells, mode, currentClassName = '') {
         }
 
         const pt = periods[p] || { start: '', end: '' };
-        html += `<tr><td class="td-period"><div class="period-num">第${p}節</div>`;
+        html += `<tr class="${p === 8 ? 'period-8-row' : ''}"><td class="td-period"><div class="period-num">第${p}節</div>`;
         if (pt.start && pt.start !== '——') {
             html += `<div class="period-time">${escText(pt.start)}<br>${escText(pt.end)}</div>`;
         }
@@ -627,8 +642,18 @@ function renderCell(cell, mode, day, period, currentClassName = '') {
         }
     }).join(' ');
 
-    const lockBadge = cell.isLocked ? `<span class="lock-tag" title="此課程已綁定，不可調課">🔒 綁課</span>` : '';
-    const cellClass = cell.isLocked ? 'td-cell cell-locked' : 'td-cell';
+    let lockBadge = '';
+    let cellClass = 'td-cell';
+
+    if (cell.isLocked) {
+        if (period === 8) {
+            lockBadge = `<span class="lock-tag lock-tag-p8" title="此為第8節獨立綁課，不可調課">🔒綁課</span>`;
+            cellClass = 'td-cell cell-locked-p8';
+        } else {
+            lockBadge = `<span class="lock-tag" title="此課程已綁定，不可調課">🔒 綁課</span>`;
+            cellClass = 'td-cell cell-locked';
+        }
+    }
 
     let subjHtml = `<div class="cell-subject">${escText(cell.subject)} ${lockBadge}</div>`;
     if (mode === 'class') {
@@ -657,7 +682,7 @@ function showAvailableTeachers(subject, day, period, className) {
         "國代", "尤靖瑜", "張詠濬", "李雪菱", "林宇涵", "林宜潔", "林菀婷", 
         "洪楷哲", "洪顧展", "洪齊成", "特教代", "盧洪恩", "簡晟軒", "莊竣麟", 
         "董祐鈞", "蔡晨虹", "蔡佩珊", "蔡鈺萱", "許錦川", "賴泓文", "趙爾梅", 
-        "郭勝綸", "郭泰延", "鄭珮辰", "鄭白苹", "鄭耀宗", "陳國川", "張曼玲"
+        "郭勝綸", "郭泰延", "鄭珮辰", "鄭白苹", "鄭耀宗", "蔡麗香", "蔡明芬", "陳國川", "張曼玲"
     ]);
 
     const primaryTeachers = (subjectTeachers[baseSubject] || []).filter(teacher => {
@@ -812,6 +837,7 @@ function printSchedule() {
   .cell-link { font-size:8.5pt; color:#444; }
   .td-empty { background:#fafafa; }
   .td-cell.cell-locked { background-color: #fff3f3; }
+  .td-cell.cell-locked-p8 { background-color: #f3e8ff; }
   .lock-tag {
       display: inline-block;
       background-color: #e63946;
@@ -821,6 +847,9 @@ function printSchedule() {
       border-radius: 3px;
       margin-left: 3px;
       font-weight: bold;
+  }
+  .lock-tag-p8 {
+      background-color: #7e22ce;
   }
   tr.tr-break { background-color: #f8f9fa; }
   .td-break-content { text-align: center; color: #666; font-size: 9pt; background-color: #f0f0f0; }

@@ -94,7 +94,10 @@
         <!-- 頂部列：第一行放學期與登出，第二行放流量統計 -->
         <div class="header-bar">
             <div class="top-row">
-                <span id="currentSemester" class="semester-badge"></span>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <span id="currentSemester" class="semester-badge"></span>
+                    <span class="p8-notice-badge">⚡ 第8節獨立綁課支援</span>
+                </div>
                 <button class="btn btn-outline-danger btn-sm logout-btn" onclick="logout()">登出</button>
             </div>
             
@@ -112,7 +115,6 @@
             <button id="tabTeacher" class="tab-btn" onclick="switchTab('teacher')">教師課表查詢</button>
         </div>
         
-        <!-- 下方 tab-panel 保持不變 ... -->
             <!-- 班級查詢 Tab -->
             <div id="panelClass" class="tab-panel">
                 <div class="query-grid">
@@ -158,6 +160,7 @@
             </div>
         </div>
     </div>
+    
     <!-- ══ 3. 課表結果視圖 ══════════════════════════════════════ -->
     <div id="resultView" class="view-container">
         <div class="result-card">
