@@ -305,7 +305,7 @@ function parseCSV(text) {
 }
 
 /* ═══════════════════════════════════════════════════════════
-    建立分類資料
+    建立分類資料 (依指定班級數字範圍精確分類)
 ═══════════════════════════════════════════════════════════ */
 function buildCategories() {
     const allClasses = new Set();
@@ -333,27 +333,31 @@ function buildCategories() {
 
     classGroups = { '七年級': [], '八年級': [], '九年級': [], '特殊班': [] };
     
-    [...allClasses].sort().forEach(cls => {
-        const firstChar = cls.charAt(0);
-        if (firstChar === '7' || cls.startsWith('七')) {
+    [...allClasses].forEach(cls => {
+        // 解析純數字 (例："701" 或 "701班" 都會得到 701)
+        const classNum = parseInt(cls.replace(/\D/g, ''), 10);
+        
+        if (classNum >= 701 && classNum <= 710) {
             classGroups['七年級'].push(cls);
-        } else if (firstChar === '8' || cls.startsWith('八')) {
+        } else if (classNum >= 801 && classNum <= 812) {
             classGroups['八年級'].push(cls);
-        } else if (firstChar === '9' || cls.startsWith('九')) {
+        } else if (classNum >= 901 && classNum <= 912) {
             classGroups['九年級'].push(cls);
         } else {
+            // 未符合以上範圍（例：711、813、特教班、體育班）一律歸入特殊班 / 其他
             classGroups['特殊班'].push(cls);
         }
     });
 
-    ['七年級', '八年級', '九年級'].forEach(g => {
+    // 各年級內部按班級數字大小排序
+    ['七年級', '八年級', '九年級', '特殊班'].forEach(g => {
         classGroups[g].sort((a, b) => {
             const numA = parseInt(a.replace(/\D/g, '')) || 0;
             const numB = parseInt(b.replace(/\D/g, '')) || 0;
-            return numA - numB;
+            if (numA !== numB) return numA - numB;
+            return a.localeCompare(b, 'zh-TW');
         });
     });
-    classGroups['特殊班'].sort();
 
     subjectTeachers = {};
     scheduleData.forEach(row => {
@@ -934,6 +938,7 @@ document.addEventListener('DOMContentLoaded', () => {
         modal.addEventListener('click', closeSubModal);
     }
 });
+
 // 開啟獨立圖片新視窗
 function openImageWindow(imgUrl) {
     // 設定新視窗的寬度與高度
