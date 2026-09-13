@@ -675,6 +675,7 @@ function renderCell(cell, mode, day, period, currentClassName = '') {
 function showAvailableTeachers(subject, day, period, className) {
     const baseSubject = normalizeSubject(subject);
     
+    // 完全保留您提供的完整排除名單
     const EXCLUDED_OTHER_SUBJECT_TEACHERS = new Set([
         "李漢堂", "陳綉燕", "何嘉峻", "蔡宜婷", "周億琳", "張孟傑", "莊宗儒", 
         "許湫萍", "邱順瑜", "陳群靜", "高健雄", "吳瑩娟", "張介凡", "Divina", 
@@ -686,17 +687,24 @@ function showAvailableTeachers(subject, day, period, className) {
         "陳國川", "張曼玲", "何嘉峻", "沈伯齡",
     ]);
 
+    // 1. 同科目空堂教師（不論節次，只要任教該科且該節空堂者）
     const primaryTeachers = (subjectTeachers[baseSubject] || []).filter(teacher => {
         const row = scheduleData.find(r => r.teachername === teacher);
         return row && !row[`s${day}${period}`];
     });
 
+    // 2. 該班其他科目空堂教師（依據是否為第 8 節進行獨立比對）
     const otherTeachersMap = new Map();
     
     if (className) {
+        // 判斷點擊的是否為第 8 節
+        const isP8Query = (period === 8);
+        // 第 8 節僅檢查 [8]；1~7 節則檢查正課 [1, 2, 3, 4, 5, 6, 7]
+        const targetPeriods = isP8Query ? [8] : [1, 2, 3, 4, 5, 6, 7];
+
         scheduleData.forEach(row => {
             for (let d = 1; d <= 5; d++) {
-                for (let p of PERIODS_ALL) {
+                for (let p of targetPeriods) {
                     const classRaw = row[`c${d}${p}`] || '';
                     const classes = classRaw.split(/[\s/]+/);
                     
@@ -737,6 +745,7 @@ function showAvailableTeachers(subject, day, period, className) {
     if (modalBody) {
         let html = '';
 
+        // 【同科】空堂教師
         html += `<div class="sub-group-title">【${escText(baseSubject)}】科空堂教師：</div>`;
         if (primaryTeachers.length === 0) {
             html += `<p class="no-teacher-msg">無同科空堂教師</p>`;
@@ -748,7 +757,9 @@ function showAvailableTeachers(subject, day, period, className) {
             html += '</div>';
         }
 
-        html += `<div class="sub-group-title mt-3">該班其他科目空堂教師：</div>`;
+        // 【其他科目】空堂教師 (標題動態區分第 8 節與正課)
+        const otherSectionTitle = (period === 8) ? '該班第八節其他任課空堂教師' : '該班其他科目空堂教師';
+        html += `<div class="sub-group-title mt-3">${otherSectionTitle}：</div>`;
         if (otherTeachersMap.size === 0) {
             html += `<p class="no-teacher-msg">無其他科目空堂教師</p>`;
         } else {
@@ -923,3 +934,20 @@ document.addEventListener('DOMContentLoaded', () => {
         modal.addEventListener('click', closeSubModal);
     }
 });
+// 開啟獨立圖片新視窗
+function openImageWindow(imgUrl) {
+    // 設定新視窗的寬度與高度
+    const width = 900;
+    const height = 700;
+    
+    // 計算讓視窗居中顯示的位置
+    const left = (window.screen.width - width) / 2;
+    const top = (window.screen.height - height) / 2;
+    
+    // 開啟獨立視窗
+    window.open(
+        imgUrl, 
+        'P8ImageWindow', 
+        `width=${width},height=${height},top=${top},left=${left},resizable=yes,scrollbars=yes,status=no,toolbar=no,menubar=no`
+    );
+}

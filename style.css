@@ -874,3 +874,28 @@ tr.period-8-row {
         line-height: 1.1;
     }
 }
+.badge-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 20px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: none;
+}
+
+/* 第八節開班表專用配色 (微暖橘/草綠系或自訂顏色) */
+.badge-p8 {
+  background-color: #e3f2fd;
+  color: #0d47a1;
+}
+
+.badge-p8:hover {
+  background-color: #bbdefb;
+  color: #0a367c;
+  transform: translateY(-1px);
+}
