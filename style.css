@@ -9,7 +9,7 @@
     --primary-hover: #0369a1;      /* 主視覺按鈕懸停深藍色 */
     --amber-color: #d97706;        /* 次要提醒/該班其他科目主題橘色 */
     --amber-hover: #b45309;        /* 橘色按鈕懸停深橘色 */
-    --bg-color: #e0f2fe;           /* 整體網頁淡藍色背景 */
+    --bg-color: #e0f2fe;            /* 整體網頁淡藍色背景 */
     --card-bg: #ffffff;            /* 白色卡片背景色 */
     --text-color: #1f2937;          /* 主要文字深灰色 */
     --text-dim: #6b7280;           /* 次要/淡化文字中灰色 */
@@ -18,9 +18,9 @@
     --locked-border: #fca5a5;      /* 綁課儲存格粉紅邊框 */
     --locked-text: #ef4444;        /* 綁課提示文字鮮紅色 */
     --locked-p8-bg: #f3e8ff;       /* 第8節綁課儲存格淡紫色背景 */
-    --locked-p8-text: #7e22ce;     /* 第8節綁課紫色文字 */
+    --locked-p8-text: #7e22ce;      /* 第8節綁課紫色文字 */
     --lunch-bg: #f0fdf4;           /* 午休/午餐時間淡綠背景 */
-    --lunch-text: #15803d;          /* 午休/午餐時間深綠文字 */
+    --lunch-text: #15803d;         /* 午休/午餐時間深綠文字 */
 }
 
 * {
@@ -257,6 +257,32 @@ body {
     margin-top: 1rem;
 }
 
+/* ── Badge 膠囊按鈕 (例如第8節開班表) ─────────────────── */
+.badge-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 12px;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: 20px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    border: none;
+}
+
+.badge-p8 {
+    background-color: #e3f2fd;
+    color: #0d47a1;
+}
+
+.badge-p8:hover {
+    background-color: #bbdefb;
+    color: #0a367c;
+    transform: translateY(-1px);
+}
+
 /* ── 查詢頁頂部列與 Tab 頁籤 ─────────────────────────────── */
 .header-bar {
     display: flex;
@@ -471,7 +497,7 @@ tr.period-8-row {
     vertical-align: middle;
 }
 
-/* ── 課表儲存格與文字樣式 (優化配色與互動感) ─────────────── */
+/* ── 課表儲存格與文字樣式 ───────────────────────────────── */
 .td-empty {
     background-color: #ffffff;
 }
@@ -559,7 +585,6 @@ tr.period-8-row {
 }
 
 /* ── 綁課樣式 ───────────────────────────────────────────── */
-/* 1. 正課綁課 (1-7 節) */
 .td-cell.cell-locked {
     background-color: var(--locked-bg) !important;
 }
@@ -578,7 +603,6 @@ tr.period-8-row {
     white-space: nowrap;
 }
 
-/* 2. 第 8 節獨立綁課 (紫底區隔) */
 .td-cell.cell-locked-p8 {
     background-color: var(--locked-p8-bg) !important;
 }
@@ -726,21 +750,30 @@ tr.period-8-row {
     color: #ca8a04;
 }
 
-/* ── 頁尾訪客計數器 ────────────────────────────────────── */
+/* ── 頁尾訪客計數器與回饋按鈕區塊 ───────────────────────── */
 .app-footer {
     width: 100%;
     margin-top: 1.5rem;
-    text-align: center;
+    display: flex;
+    justify-content: center;
+}
+
+.footer-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
 }
 
 .visitor-box {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
     padding: 6px 16px;
-    background-color: rgba(255, 255, 255, 0.85);
+    background-color: rgba(255, 255, 255, 0.9);
     border-radius: 20px;
     font-size: 0.85rem;
     color: #4a5568;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
 }
 
 #visitorCount {
@@ -749,7 +782,47 @@ tr.period-8-row {
     margin-left: 4px;
 }
 
-/* ── 行動裝置 RWD ────────────────────────────────────────── */
+/* 回饋與建議按鈕 */
+.feedback-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background-color: #ffffff;
+    color: #2b6cb0;
+    border: 1px solid #e2e8f0;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-decoration: none;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+}
+
+.feedback-btn:hover {
+    background-color: #ebf8ff;
+    color: #2c5282;
+    border-color: #bee3f8;
+    transform: translateY(-1px);
+}
+
+/* ── 行動裝置 RWD 微調 (平板與手機) ─────────────────────── */
+@media (max-width: 768px) {
+    /* 手機版年級與下拉選單間距微調 */
+    .grade-group, 
+    .form-group,
+    .form-control,
+    .form-select {
+        margin-bottom: 8px !important;
+    }
+
+    .grade-badge,
+    .form-label,
+    .form-group label.grade-label {
+        margin-bottom: 4px !important;
+    }
+}
+
 @media screen and (max-width: 600px) {
     body {
         padding: 2px !important;
@@ -873,29 +946,4 @@ tr.period-8-row {
         margin: 0 !important;
         line-height: 1.1;
     }
-}
-.badge-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 12px;
-  font-size: 13px;
-  font-weight: 500;
-  border-radius: 20px;
-  text-decoration: none;
-  transition: all 0.2s ease;
-  cursor: pointer;
-  border: none;
-}
-
-/* 第八節開班表專用配色 (微暖橘/草綠系或自訂顏色) */
-.badge-p8 {
-  background-color: #e3f2fd;
-  color: #0d47a1;
-}
-
-.badge-p8:hover {
-  background-color: #bbdefb;
-  color: #0a367c;
-  transform: translateY(-1px);
 }
