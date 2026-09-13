@@ -131,12 +131,16 @@
         </div>
     </div>
     
-    <!-- ══ 3. 課表結果視圖 ══════════════════════════════════════ -->
+<!-- ══ 3. 課表結果視圖 ══════════════════════════════════════ -->
     <div id="resultView" class="view-container">
         <div class="result-card">
             <div class="action-bar">
                 <button id="backBtn" class="btn btn-secondary" onclick="goBack()">← 返回上一頁</button>
                 <div>
+                    <!-- 新增：上一班與下一班按鈕 (預設隱藏，僅班級查詢時顯示) -->
+                    <button id="prevClassBtn" class="btn btn-outline" onclick="navigateClass(-1)" style="display: none;">上一班</button>
+                    <button id="nextClassBtn" class="btn btn-outline" onclick="navigateClass(1)" style="display: none;">下一班</button>
+                    
                     <button class="btn btn-outline" onclick="showQueryView()">回查詢頁</button>
                     <button class="btn btn-primary" onclick="printSchedule()">列印課表</button>
                 </div>

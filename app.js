@@ -10,14 +10,15 @@
 const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyymH4_8hdi1SmccV6-m8hMsVJhkdEHDBtci9kluH_gb-37ERTX-JL4OOE_z7od6fSgUw/exec";
 
 /* ── 全域狀態 ─────────────────────────────────────────────── */
-let scheduleData    = [];   // CSV 全部資料
-let homeroomData    = {};   // 導師資料 JSON
-let lockedData      = {};   // 1~7 節綁課資料 JSON
-let lockedDataP8    = {};   // 第 8 節獨立綁課資料 JSON
-let isLoggedIn      = false;
-let navHistory      = [];   // 導航歷史 [{type, value}]
-let classGroups     = {};   // 班級分類
-let subjectTeachers = {};   // 科目→教師
+let scheduleData          = [];   // CSV 全部資料
+let homeroomData          = {};   // 導師資料 JSON
+let lockedData            = {};   // 1~7 節綁課資料 JSON
+let lockedDataP8          = {};   // 第 8 節獨立綁課資料 JSON
+let isLoggedIn            = false;
+let navHistory            = [];   // 導航歷史 [{type, value}]
+let classGroups           = {};   // 班級分類
+let subjectTeachers       = {};   // 科目→教師
+let currentDisplayedClass = '';   // 當前顯示的班級名稱
 
 const PERIODS_ALL   = [0, 1, 2, 3, 4, 5, 6, 7, 8]; // 0=早自習, 1~8=第1~8節
 const DAYS          = ['一', '二', '三', '四', '五'];
@@ -165,6 +166,77 @@ function updateBackBtn() {
     const btn = document.getElementById('backBtn');
     if (!btn) return;
     btn.style.visibility = navHistory.length > 1 ? 'visible' : 'hidden';
+}
+
+/* ═══════════════════════════════════════════════════════════
+    上一班 / 下一班 快速切換邏輯
+═══════════════════════════════════════════════════════════ */
+
+/**
+ * 根據班級名稱，取得該班在同年級（或特殊班）清單中的索引與整個陣列
+ */
+function getClassNavigationInfo(className) {
+    if (!className) return { list: [], index: -1 };
+    
+    let targetGroup = null;
+    for (const groupName in classGroups) {
+        if (classGroups[groupName].includes(className)) {
+            targetGroup = classGroups[groupName];
+            break;
+        }
+    }
+
+    if (!targetGroup) return { list: [], index: -1 };
+
+    const index = targetGroup.indexOf(className);
+    return { list: targetGroup, index };
+}
+
+/**
+ * 切換至上一班 (-1) 或 下一班 (+1)
+ */
+function navigateClass(direction) {
+    if (!currentDisplayedClass) return;
+
+    const { list, index } = getClassNavigationInfo(currentDisplayedClass);
+    if (index === -1) return;
+
+    const newIndex = index + direction;
+    if (newIndex >= 0 && newIndex < list.length) {
+        const targetClass = list[newIndex];
+        
+        // 替換歷史紀錄最後一筆，避免按返回鍵時卡在快速切換的歷史中
+        if (navHistory.length > 0) {
+            navHistory[navHistory.length - 1] = { type: 'class', value: targetClass };
+        }
+        
+        displayClassSchedule(targetClass);
+    }
+}
+
+/**
+ * 控制【上一班 / 下一班】按鈕的顯示與停用狀態
+ */
+function updateClassNavButtons(className) {
+    const prevBtn = document.getElementById('prevClassBtn');
+    const nextBtn = document.getElementById('nextClassBtn');
+    if (!prevBtn || !nextBtn) return;
+
+    const { list, index } = getClassNavigationInfo(className);
+
+    if (index === -1 || list.length <= 1) {
+        prevBtn.style.display = 'none';
+        nextBtn.style.display = 'none';
+        return;
+    }
+
+    // 顯示按鈕
+    prevBtn.style.display = 'inline-block';
+    nextBtn.style.display = 'inline-block';
+
+    // 若為第 1 班則禁用「上一班」，若為最後一班則禁用「下一班」
+    prevBtn.disabled = (index === 0);
+    nextBtn.disabled = (index === list.length - 1);
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -518,6 +590,7 @@ function submitTeacherQuery() {
     顯示課表
 ═══════════════════════════════════════════════════════════ */
 function displayClassSchedule(className) {
+    currentDisplayedClass = className; // 記錄當前顯示的班級
     pushNav('class', className);
     const cells = {};
     scheduleData.forEach(row => {
@@ -551,11 +624,22 @@ function displayClassSchedule(className) {
     if (scheduleTitle) scheduleTitle.innerHTML = `${escText(className)} 班課表 ${hmHtml}`;
     if (scheduleTableContainer) scheduleTableContainer.innerHTML = buildScheduleTable(cells, 'class', className);
 
+    // 更新【上一班 / 下一班】按鈕的顯示狀態與啟用邏輯
+    updateClassNavButtons(className);
+
     showView('resultView');
     updateBackBtn();
 }
 
 function displayTeacherSchedule(teacherName) {
+    currentDisplayedClass = ''; // 清除班級紀錄
+    
+    // 隱藏【上一班 / 下一班】按鈕
+    const prevBtn = document.getElementById('prevClassBtn');
+    const nextBtn = document.getElementById('nextClassBtn');
+    if (prevBtn) prevBtn.style.display = 'none';
+    if (nextBtn) nextBtn.style.display = 'none';
+
     pushNav('teacher', teacherName);
     const row   = scheduleData.find(r => r.teachername === teacherName);
     const cells = {};
@@ -941,15 +1025,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // 開啟獨立圖片新視窗
 function openImageWindow(imgUrl) {
-    // 設定新視窗的寬度與高度
     const width = 900;
     const height = 700;
     
-    // 計算讓視窗居中顯示的位置
     const left = (window.screen.width - width) / 2;
     const top = (window.screen.height - height) / 2;
     
-    // 開啟獨立視窗
     window.open(
         imgUrl, 
         'P8ImageWindow', 

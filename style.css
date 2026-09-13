@@ -384,13 +384,82 @@ body {
     gap: 16px;
 }
 
-/* ── 課表結果頁標頭與導師資訊 ─────────────────────────────── */
+/* ── 課表結果頁按鈕控制區 (雙行配置) ──────────────────────── */
+/* ── 課表結果頁按鈕控制區 ─────────────────────────────── */
 .action-bar {
     display: flex;
-    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 6px;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto 16px auto;
+}
+
+/* 1. 「← 返回上一頁」獨佔第一行最高順位 */
+#backBtn {
+    order: 1 !important;
+    width: 100% !important;
+    flex: 0 0 100% !important;
+}
+
+/* 2. 其餘 4 個功能按鈕放在第二行，強迫水平平分排列 */
+.action-bar button:not(#backBtn),
+.action-bar .btn:not(#backBtn) {
+    order: 2 !important;
+    flex: 1 1 0px !important;
+    width: auto !important;
+    font-size: 0.82rem !important;
+    padding: 0 2px !important;
+}
+
+/* 上一班 / 下一班按鈕專屬樣式 */
+#prevClassBtn, 
+#nextClassBtn {
+    display: inline-flex;
     align-items: center;
-    margin-bottom: 16px;
-    gap: 10px;
+    justify-content: center;
+    font-weight: 500;
+    color: #ffffff;
+    background-color: #4a6fa5;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, opacity 0.2s ease;
+}
+
+#prevClassBtn:hover:not(:disabled), 
+#nextClassBtn:hover:not(:disabled) {
+    background-color: #3b5998;
+}
+
+#prevClassBtn:disabled, 
+#nextClassBtn:disabled {
+    background-color: #cccccc;
+    color: #666666;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* 統一按鈕列高度與文字縮放 */
+.action-bar button,
+.action-bar .btn {
+    height: 40px !important;
+    margin: 0 !important;
+    white-space: nowrap !important;
+    box-sizing: border-box !important;
+}
+/* 桌機版（寬度 > 600px）恢復單行平舖 */
+@media (min-width: 601px) {
+    .action-bar {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        max-width: 100%;
+        gap: 10px;
+    }
+    #backBtn {
+        grid-column: auto;
+    }
 }
 
 .title-header-container {
@@ -808,7 +877,6 @@ tr.period-8-row {
 
 /* ── 行動裝置 RWD 微調 (平板與手機) ─────────────────────── */
 @media (max-width: 768px) {
-    /* 手機版年級與下拉選單間距微調 */
     .grade-group, 
     .form-group,
     .form-control,
