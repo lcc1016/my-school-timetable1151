@@ -453,8 +453,16 @@ function buildCategories() { // 函式：自動建立班級分類與科目教師
 } // buildCategories 函式結束
 
 function normalizeSubject(subj) { // 輔助函式：去除科目尾綴字眼 (如: 輔導、加強)
-    return (subj || '').replace(/輔導$/, '').replace(/加強$/, '').trim(); // 移除字尾「輔導」與「加強」並清除空白
-} // normalizeSubject 函式結束
+    const trimmed = (subj || '').trim();
+    
+    // 如果科目名稱完全等於「輔導」或「加強」，直接傳回原名稱，不要將其清空
+    if (trimmed === '輔導' || trimmed === '加強') {
+        return trimmed;
+    }
+    
+    // 只有在作為尾綴時（如：國文輔導、數學加強）才進行移除
+    return trimmed.replace(/輔導$/, '').replace(/加強$/, '').trim(); 
+}
 
 /* ═══════════════════════════════════════════════════════════
     填充查詢 UI
