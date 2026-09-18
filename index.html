@@ -1,179 +1,179 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>課表查詢系統</title>
+<!DOCTYPE html> <!-- 宣告文件類型為 HTML5 標準格式 -->
+<html lang="zh-TW"> <!-- 指定網頁主要語言為繁體中文 (台灣) -->
+<head> <!-- 存放網頁後台設定與資源引入的頭部區塊 -->
+    <meta charset="UTF-8"> <!-- 設定網頁文字編碼為 UTF-8，防止中文亂碼 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- 針對行動裝置進行 RWD 響應式縮放設定 -->
+    <title>課表查詢系統</title> <!-- 設定瀏覽器分頁標籤顯示的網頁標題 -->
     
-    <!-- iPhone / iPad 加入主畫面書籤圖示設定 -->
-    <link rel="apple-touch-icon" sizes="180x180" href="網站LOGO.png">
-    <!-- 網頁標籤頁 Favicon 設定 -->
-    <link rel="icon" type="image/png" href="網站LOGO.png">
+    <!-- iPhone / iPad 加入主畫面書籤圖示設定 --> <!-- 說明區塊：iOS 裝置桌面圖示設定 -->
+    <link rel="apple-touch-icon" sizes="180x180" href="網站LOGO.png"> <!-- 指定 iOS 加入主畫面時使用的 180x180 圖示 -->
+    <!-- 網頁標籤頁 Favicon 設定 --> <!-- 說明區塊：瀏覽器分頁圖示設定 -->
+    <link rel="icon" type="image/png" href="網站LOGO.png"> <!-- 指定瀏覽器頁籤顯示的 PNG 小圖示 -->
     
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
+    <link rel="stylesheet" href="style.css"> <!-- 引入全域主要的 CSS 樣式表檔案 -->
+</head> <!-- 頭部設定區塊結束 -->
+<body> <!-- 網頁主要視覺與內容顯示區塊開始 -->
 
-    <!-- ══ 載入中遮罩 ══════════════════════════════════════════ -->
-    <div id="loadingOverlay" class="loading-overlay">
-        <div class="spinner"></div>
-        <div class="loading-text">資料載入中，請稍候...</div>
-    </div>
+    <!-- ══ 載入中遮罩 ══════════════════════════════════════════ --> <!-- 說明區塊：全域 Loading 遮罩 -->
+    <div id="loadingOverlay" class="loading-overlay"> <!-- 載入中遮罩的全螢幕覆蓋容器 -->
+        <div class="spinner"></div> <!-- CSS 動態旋轉轉圈圖示 -->
+        <div class="loading-text">資料載入中，請稍候...</div> <!-- 載入中提示文字區塊 -->
+    </div> <!-- 載入中遮罩容器結束 -->
 
-    <!-- ══ 1. 登入視圖 ══════════════════════════════════════════ -->
-    <div id="loginView" class="view-container active">
-        <!-- 白框卡片區 -->
-        <div class="login-card">
-            <div class="login-header">
-                <!-- 保留原頁面校徽 logo.png -->
-                <img src="logo.png" alt="校徽" class="school-logo">
-                <div class="title-group">
-                    <h1 class="system-title">民雄國中<br>課表查詢系統</h1>
-                    <p class="system-subtitle">請選擇學期並登入查詢</p>
-                </div>
-            </div>
+    <!-- ══ 1. 登入視圖 ══════════════════════════════════════════ --> <!-- 說明區塊：登入視圖頁面 -->
+    <div id="loginView" class="view-container active"> <!-- 登入頁面視圖容器（預設加上 .active 顯示） -->
+        <!-- 白框卡片區 --> <!-- 說明區塊：登入白底圓角卡片 -->
+        <div class="login-card"> <!-- 登入卡片主外框容器 -->
+            <div class="login-header"> <!-- 登入卡片標頭區（包含校徽與系統名稱） -->
+                <!-- 保留原頁面校徽 logo.png --> <!-- 說明區塊：校徽圖示說明 -->
+                <img src="logo.png" alt="校徽" class="school-logo"> <!-- 顯示民雄國中校徽圖片 -->
+                <div class="title-group"> <!-- 系統標題文字群組容器 -->
+                    <h1 class="system-title">民雄國中<br>課表查詢系統</h1> <!-- 系統主標題（含換行） -->
+                    <p class="system-subtitle">請選擇學期並登入查詢</p> <!-- 系統副標題提示文字 -->
+                </div> <!-- 標題文字群組容器結束 -->
+            </div> <!-- 登入卡片標頭區結束 -->
 
-            <form id="loginForm">
-                <div class="form-group">
-                    <label for="semesterSelect">學期選擇</label>
-                    <select id="semesterSelect" class="form-control">
-                        <!-- 由 JS 動態填入 -->
-                    </select>
-                </div>
+            <form id="loginForm"> <!-- 登入表單元件開始 -->
+                <div class="form-group"> <!-- 學期選擇下拉選單表單組 -->
+                    <label for="semesterSelect">學期選擇</label> <!-- 下拉選單文字標籤 -->
+                    <select id="semesterSelect" class="form-control"> <!-- 學期下拉選單，選單內容由 JS 動態生成 -->
+                        <!-- 由 JS 動態填入 --> <!-- 說明區塊：動態渲染選單提示 -->
+                    </select> <!-- 學期下拉選單結束 -->
+                </div> <!-- 學期表單組結束 -->
 
-                <div id="loginError" class="error-msg"></div>
+                <div id="loginError" class="error-msg"></div> <!-- 用於顯示登入失敗或錯誤訊息的容器 -->
 
-                <button type="submit" id="loginBtn" class="btn btn-primary btn-block">
-                    <span id="loginSpinner" class="btn-spinner"></span>
-                    進入系統
-                </button>
-            </form>
-        </div>
+                <button type="submit" id="loginBtn" class="btn btn-primary btn-block"> <!-- 登入表單提交按鈕 -->
+                    <span id="loginSpinner" class="btn-spinner"></span> <!-- 按鈕內部的轉圈 Loading 動畫圖示容器 -->
+                    進入系統 <!-- 按鈕主要顯示文字 -->
+                </button> <!-- 登入按鈕結束 -->
+            </form> <!-- 登入表單結束 -->
+        </div> <!-- 登入卡片外框結束 -->
 
-        <!-- 頁尾計數器與回饋按鈕 -->
-        <footer class="app-footer">
-            <div class="footer-bar">
-                <div class="visitor-box">
-                    👀 累積瀏覽人次：<span id="visitorCount">0</span>
-                </div>
-                <a href="https://forms.gle/wHm7gkpCEearwkLK6" target="_blank" class="feedback-btn">
-                    💬 回饋與建議
-                </a>
-            </div>
-        </footer>
-    </div>
+        <!-- 頁尾計數器與回饋按鈕 --> <!-- 說明區塊：登入頁頁尾資訊 -->
+        <footer class="app-footer"> <!-- 登入視圖頁尾容器 -->
+            <div class="footer-bar"> <!-- 頁尾工具列容器 -->
+                <div class="visitor-box"> <!-- 累積瀏覽人次顯示外框 -->
+                    👀 累積瀏覽人次：<span id="visitorCount">0</span> <!-- 瀏覽人數標籤與動態數字容器 -->
+                </div> <!-- 累積瀏覽人次外框結束 -->
+                <a href="https://forms.gle/wHm7gkpCEearwkLK6" target="_blank" class="feedback-btn"> <!-- 開啟 Google 表單的回饋按鈕（在新視窗開啟） -->
+                    💬 回饋與建議 <!-- 回饋按鈕顯示文字 -->
+                </a> <!-- 回饋按鈕連結結束 -->
+            </div> <!-- 頁尾工具列結束 -->
+        </footer> <!-- 登入頁尾結束 -->
+    </div> <!-- 登入視圖頁面結束 -->
 
-    <!-- ══ 2. 查詢面板視圖 ══════════════════════════════════════ -->
-    <div id="queryView" class="view-container">
-        <div class="query-card">
-            <!-- 頂部列：第一行放學期與登出，第二行放流量統計 -->
-            <div class="header-bar">
-                <div class="top-row">
-                    <div style="display: flex; gap: 8px; align-items: center;">
-                        <span id="currentSemester" class="semester-badge"></span>
-                        <button type="button" class="badge-btn badge-p8" onclick="openImageWindow('11501_8.jpg')">
-                            📊 第八節開班表
-                        </button>
-                    </div>
-                    <button class="btn btn-outline-danger btn-sm logout-btn" onclick="logout()">登出</button>
-                </div>
+    <!-- ══ 2. 查詢面板視圖 ══════════════════════════════════════ --> <!-- 說明區塊：查詢面板視圖頁面 -->
+    <div id="queryView" class="view-container"> <!-- 查詢頁面視圖容器（預設隱藏） -->
+        <div class="query-card"> <!-- 查詢面板白底圓角卡片容器 -->
+            <!-- 頂部列：第一行放學期與登出，第二行放流量統計 --> <!-- 說明區塊：查詢頁頂部狀態欄說明 -->
+            <div class="header-bar"> <!-- 頂部狀態資訊條容器 -->
+                <div class="top-row"> <!-- 頂部列第一行：當前學期、附加按鈕與登出按鈕 -->
+                    <div style="display: flex; gap: 8px; align-items: center;"> <!-- 左側學期標籤與第八節按鈕群組容器 -->
+                        <span id="currentSemester" class="semester-badge"></span> <!-- 顯示當前選擇學期的膠囊標籤 -->
+                        <button type="button" class="badge-btn badge-p8" onclick="openImageWindow('11501_8.jpg')"> <!-- 點擊彈出第八節開班表圖片的膠囊按鈕 -->
+                            📊 第八節開班表 <!-- 按鈕文字 -->
+                        </button> <!-- 第八節按鈕結束 -->
+                    </div> <!-- 左側群組容器結束 -->
+                    <button class="btn btn-outline-danger btn-sm logout-btn" onclick="logout()">登出</button> <!-- 右側系統登出按鈕 -->
+                </div> <!-- 頂部列第一行結束 -->
                 
-                <div class="stats-row">
-                    <div class="visit-stats-badge">
-                        <span>🗓️ 當月瀏覽：<strong id="monthViews">0</strong> 人次</span>
-                        <span class="sep">|</span>
-                        <span>📈 累計瀏覽：<strong id="totalViews">0</strong> 人次</span>
-                    </div>
-                </div>
-            </div>
+                <div class="stats-row"> <!-- 頂部列第二行：流量統計資訊列 -->
+                    <div class="visit-stats-badge"> <!-- 流量統計膠囊容器 -->
+                        <span>🗓️ 當月瀏覽：<strong id="monthViews">0</strong> 人次</span> <!-- 當月瀏覽人數動態數字 -->
+                        <span class="sep">|</span> <!-- 分隔線號碼 -->
+                        <span>📈 累計瀏覽：<strong id="totalViews">0</strong> 人次</span> <!-- 全站累計瀏覽人數動態數字 -->
+                    </div> <!-- 流量統計膠囊結束 -->
+                </div> <!-- 統計列結束 -->
+            </div> <!-- 頂部狀態資訊條結束 -->
 
-            <div class="tab-header" style="margin-top: 15px;">
-                <button id="tabClass" class="tab-btn active" onclick="switchTab('class')">班級課表查詢</button>
-                <button id="tabTeacher" class="tab-btn" onclick="switchTab('teacher')">教師課表查詢</button>
-            </div>
+            <div class="tab-header" style="margin-top: 15px;"> <!-- 查詢模式切換頁籤 (Tab) 標頭容器 -->
+                <button id="tabClass" class="tab-btn active" onclick="switchTab('class')">班級課表查詢</button> <!-- 切換至「班級查詢」模式的頁籤按鈕 -->
+                <button id="tabTeacher" class="tab-btn" onclick="switchTab('teacher')">教師課表查詢</button> <!-- 切換至「教師查詢」模式的頁籤按鈕 -->
+            </div> <!-- 頁籤標頭結束 -->
             
-            <!-- 班級查詢 Tab -->
-            <div id="panelClass" class="tab-panel">
-                <div class="query-grid">
-                    <div class="form-group">
-                        <label for="sel7" class="grade-label grade-7">七年級</label>
-                        <select id="sel7" class="form-control"><option value="">— 選擇班級 —</option></select>
-                    </div>
-                    <div class="form-group">
-                        <label for="sel8" class="grade-label grade-8">八年級</label>
-                        <select id="sel8" class="form-control"><option value="">— 選擇班級 —</option></select>
-                    </div>
-                    <div class="form-group">
-                        <label for="sel9" class="grade-label grade-9">九年級</label>
-                        <select id="sel9" class="form-control"><option value="">— 選擇班級 —</option></select>
-                    </div>
-                    <div class="form-group">
-                        <label for="selSp" class="grade-label grade-special">特殊班 / 其他</label>
-                        <select id="selSp" class="form-control"><option value="">— 選擇班級 —</option></select>
-                    </div>
-                </div>
-                <div id="classError" class="error-msg"></div>
-                <button class="btn btn-primary btn-block mt-3" onclick="submitClassQuery()">查詢班級課表</button>
-            </div>
+            <!-- 班級查詢 Tab --> <!-- 說明區塊：班級查詢選單區塊 -->
+            <div id="panelClass" class="tab-panel"> <!-- 班級查詢內容面板容器 -->
+                <div class="query-grid"> <!-- 四年級班級選單的四欄網格容器 -->
+                    <div class="form-group"> <!-- 七年級選單表單組 -->
+                        <label for="sel7" class="grade-label grade-7">七年級</label> <!-- 七年級彩色標籤 -->
+                        <select id="sel7" class="form-control"><option value="">— 選擇班級 —</option></select> <!-- 七年級班級下拉選單 -->
+                    </div> <!-- 七年級表單組結束 -->
+                    <div class="form-group"> <!-- 八年級選單表單組 -->
+                        <label for="sel8" class="grade-label grade-8">八年級</label> <!-- 八年級彩色標籤 -->
+                        <select id="sel8" class="form-control"><option value="">— 選擇班級 —</option></select> <!-- 八年級班級下拉選單 -->
+                    </div> <!-- 八年級表單組結束 -->
+                    <div class="form-group"> <!-- 九年級選單表單組 -->
+                        <label for="sel9" class="grade-label grade-9">九年級</label> <!-- 九年級彩色標籤 -->
+                        <select id="sel9" class="form-control"><option value="">— 選擇班級 —</option></select> <!-- 九年級班級下拉選單 -->
+                    </div> <!-- 九年級表單組結束 -->
+                    <div class="form-group"> <!-- 特殊班選單表單組 -->
+                        <label for="selSp" class="grade-label grade-special">特殊班 / 其他</label> <!-- 特殊班彩色標籤 -->
+                        <select id="selSp" class="form-control"><option value="">— 選擇班級 —</option></select> <!-- 特殊班班級下拉選單 -->
+                    </div> <!-- 特殊班表單組結束 -->
+                </div> <!-- 班級網格容器結束 -->
+                <div id="classError" class="error-msg"></div> <!-- 顯示班級查詢未選擇等錯誤訊息的容器 -->
+                <button class="btn btn-primary btn-block mt-3" onclick="submitClassQuery()">查詢班級課表</button> <!-- 提交班級查詢按鈕 -->
+            </div> <!-- 班級查詢面板結束 -->
 
-            <!-- 教師查詢 Tab -->
-            <div id="panelTeacher" class="tab-panel hidden">
-                <div class="query-grid-2">
-                    <div class="form-group">
-                        <label for="subjectSelect">任教科目</label>
-                        <select id="subjectSelect" class="form-control" onchange="onSubjectChange()">
-                            <option value="">— 選擇科目 —</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="teacherSelect">教師姓名</label>
-                        <select id="teacherSelect" class="form-control">
-                            <option value="">— 選擇教師 —</option>
-                        </select>
-                    </div>
-                </div>
-                <div id="teacherError" class="error-msg"></div>
-                <button class="btn btn-primary btn-block mt-3" onclick="submitTeacherQuery()">查詢教師課表</button>
-            </div>
-        </div>
-    </div>
+            <!-- 教師查詢 Tab --> <!-- 說明區塊：教師查詢選單區塊 -->
+            <div id="panelTeacher" class="tab-panel hidden"> <!-- 教師查詢內容面板容器（預設隱藏） -->
+                <div class="query-grid-2"> <!-- 科目與教師選單的雙欄網格容器 -->
+                    <div class="form-group"> <!-- 任教科目下拉選單表單組 -->
+                        <label for="subjectSelect">任教科目</label> <!-- 科目選單標籤 -->
+                        <select id="subjectSelect" class="form-control" onchange="onSubjectChange()"> <!-- 科目下拉選單，變更時觸發連動更新教師選單 -->
+                            <option value="">— 選擇科目 —</option> <!-- 科目選單預設預設選項 -->
+                        </select> <!-- 科目選單結束 -->
+                    </div> <!-- 科目表單組結束 -->
+                    <div class="form-group"> <!-- 教師姓名下拉選單表單組 -->
+                        <label for="teacherSelect">教師姓名</label> <!-- 教師選單標籤 -->
+                        <select id="teacherSelect" class="form-control"> <!-- 教師姓名下拉選單 -->
+                            <option value="">— 選擇教師 —</option> <!-- 教師選單預設選項 -->
+                        </select> <!-- 教師選單結束 -->
+                    </div> <!-- 教師表單組結束 -->
+                </div> <!-- 教師網格容器結束 -->
+                <div id="teacherError" class="error-msg"></div> <!-- 顯示教師查詢未選擇等錯誤訊息的容器 -->
+                <button class="btn btn-primary btn-block mt-3" onclick="submitTeacherQuery()">查詢教師課表</button> <!-- 提交教師查詢按鈕 -->
+            </div> <!-- 教師查詢面板結束 -->
+        </div> <!-- 查詢卡片外框結束 -->
+    </div> <!-- 查詢面板視圖結束 -->
     
-    <!-- ══ 3. 課表結果視圖 ══════════════════════════════════════ -->
-    <div id="resultView" class="view-container">
-        <div class="result-card">
-            <div class="action-bar">
-                <button id="backBtn" class="btn btn-secondary" onclick="goBack()">← 返回上一頁</button>
-                <div>
-                    <!-- 新增：上一班與下一班按鈕 (預設隱藏，僅班級查詢時顯示) -->
-                    <button id="prevClassBtn" class="btn btn-outline" onclick="navigateClass(-1)" style="display: none;">上一班</button>
-                    <button id="nextClassBtn" class="btn btn-outline" onclick="navigateClass(1)" style="display: none;">下一班</button>
+    <!-- ══ 3. 課表結果視圖 ══════════════════════════════════════ --> <!-- 說明區塊：課表結果渲染視圖頁面 -->
+    <div id="resultView" class="view-container"> <!-- 課表結果視圖容器（預設隱藏） -->
+        <div class="result-card"> <!-- 結果白底圓角卡片容器 -->
+            <div class="action-bar"> <!-- 結果頁頂部操作按鈕工具列區塊 -->
+                <button id="backBtn" class="btn btn-secondary" onclick="goBack()">← 返回上一頁</button> <!-- 返回前一個頁面的按鈕 -->
+                <div> <!-- 右側其他操作功能按鈕群組容器 -->
+                    <!-- 新增：上一班與下一班按鈕 (預設隱藏，僅班級查詢時顯示) --> <!-- 說明區塊：班級快速切換按鈕說明 -->
+                    <button id="prevClassBtn" class="btn btn-outline" onclick="navigateClass(-1)" style="display: none;">上一班</button> <!-- 切換至前一個班級的按鈕 -->
+                    <button id="nextClassBtn" class="btn btn-outline" onclick="navigateClass(1)" style="display: none;">下一班</button> <!-- 切換至後一個班級的按鈕 -->
                     
-                    <button class="btn btn-outline" onclick="showQueryView()">回查詢頁</button>
-                    <button class="btn btn-primary" onclick="printSchedule()">列印課表</button>
-                </div>
-            </div>
+                    <button class="btn btn-outline" onclick="showQueryView()">回查詢頁</button> <!-- 直接跳轉回到查詢主頁面的按鈕 -->
+                    <button class="btn btn-primary" onclick="printSchedule()">列印課表</button> <!-- 觸發列印課表功能按鈕 -->
+                </div> <!-- 操作按鈕群組結束 -->
+            </div> <!-- 操作工具列結束 -->
 
-            <div id="headerContainer" class="title-header-container">
-                <h2 id="scheduleTitle" class="schedule-title"></h2>
-            </div>
+            <div id="headerContainer" class="title-header-container"> <!-- 課表抬頭標題與導師資訊的容器 -->
+                <h2 id="scheduleTitle" class="schedule-title"></h2> <!-- 動態填入課表抬頭標題文字 (如：701 課表) -->
+            </div> <!-- 抬頭標題容器結束 -->
 
-            <div id="scheduleTableContainer" class="table-responsive"></div>
-        </div>
-    </div>
+            <div id="scheduleTableContainer" class="table-responsive"></div> <!-- 用於動態插入 HTML 課表表格結構的容器 -->
+        </div> <!-- 結果卡片外框結束 -->
+    </div> <!-- 課表結果視圖結束 -->
 
-    <!-- ══ 4. 可代課教師彈出視窗 (Modal) ════════════════════════ -->
-    <div id="subModal" class="modal" onclick="closeSubModal(event)">
-        <div class="modal-content" onclick="event.stopPropagation()">
-            <div class="modal-header">
-                <h3 id="modalTitle">可代課教師名單</h3>
-                <button type="button" class="modal-close" onclick="closeSubModal()">&times;</button>
-            </div>
-            <div id="modalBody" class="modal-body"></div>
-        </div>
-    </div>
+    <!-- ══ 4. 可代課教師彈出視窗 (Modal) ════════════════════════ --> <!-- 說明區塊：代課教師 Modal 彈出視窗 -->
+    <div id="subModal" class="modal" onclick="closeSubModal(event)"> <!-- 代課視窗背景遮罩（點擊背景時觸發關閉） -->
+        <div class="modal-content" onclick="event.stopPropagation()"> <!-- 代課視窗白框主體（阻擋冒泡事件防止點擊內部被關閉） -->
+            <div class="modal-header"> <!-- 彈出視窗標頭列 -->
+                <h3 id="modalTitle">可代課教師名單</h3> <!-- 彈出視窗標題 -->
+                <button type="button" class="modal-close" onclick="closeSubModal()">&times;</button> <!-- 視窗右上角的關閉叉叉按鈕 -->
+            </div> <!-- 視窗標頭列結束 -->
+            <div id="modalBody" class="modal-body"></div> <!-- 動態填入代課教師名單按鈕膠囊的身體區塊 -->
+        </div> <!-- 代課視窗主體結束 -->
+    </div> <!-- 代課視窗遮罩結束 -->
 
-    <!-- 腳本引入 -->
-    <script src="config.js"></script>
-    <script src="app.js"></script>
-</body>
-</html>
+    <!-- 腳本引入 --> <!-- 說明區塊：引入系統 JS 檔案 -->
+    <script src="config.js"></script> <!-- 引入系統全域設定檔（如：資料版本、路徑等） -->
+    <script src="app.js"></script> <!-- 引入系統核心邏輯與 API 互動 JS 腳本 -->
+</body> <!-- 網頁內容區塊結束 -->
+</html> <!-- HTML 文件結束 -->
