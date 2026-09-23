@@ -836,37 +836,42 @@ tr.tr-break .td-period {
     }
 }
 
-/* ── 16. 年級標籤彩色膠囊方框樣式 ───────────────────────── */
-.form-group label.grade-label {
-    display: inline-block;             /* 行內區塊元素 */
-    padding: 4px 12px;                 /* 內邊距 */
+/* ── 16. 年級與教師查詢標籤彩色膠囊方框樣式 ─────────────────── */
+.form-group label.grade-label,
+.form-group label {
+    display: inline-block;             /* 行內區塊元素，產生膠囊框 */
+    padding: 4px 12px;                 /* 內邊距留白 */
     border-radius: 6px;                /* 圓角 6px */
     font-weight: 700;                  /* 粗體 */
-    font-size: 0.9rem;                 /* 字體 14.4px */
-    margin-bottom: 8px;                /* 下邊距 8px */
+    font-size: 0.9rem;                 /* 字體大小 */
+    margin-bottom: 8px;                /* 與下拉選單的下邊距 */
 }
 
+/* 八年級 ＆ 任教科目：同比八年級淡橘背景深橘文字 */
+.form-group label.grade-8,
+label[for="subjectSelect"] {
+    background-color: #ffe4d9 !important;
+    color: #96482d !important;
+}
+
+/* 九年級 ＆ 教師姓名：同比九年級淡綠背景深綠文字 */
+.form-group label.grade-9,
+label[for="teacherSelect"] {
+    background-color: #dcfce7 !important;
+    color: #16a34a !important;
+}
+
+/* 七年級：淡藍背景天藍文字 */
 .form-group label.grade-7 {
-    background-color: #e0f2fe;         /* 七年級淡藍背景 */
-    color: #0284c7;                    /* 七年級天藍文字 */
+    background-color: #e0f2fe !important;
+    color: #0284c7 !important;
 }
 
-.form-group label.grade-8 {
-    background-color: #ffe4d9;         /* 八年級淡靛紫背景 */
-    color: #96482d;                    /* 八年級靛紫文字 */
-}
-
-.form-group label.grade-9 {
-    background-color: #dcfce7;         /* 九年級淡綠背景 */
-    color: #16a34a;                    /* 九年級綠色文字 */
-}
-
+/* 特殊班：淡黃背景暗黃文字 */
 .form-group label.grade-special {
-    background-color: #fef9c3;         /* 特殊班淡黃背景 */
-    color: #ca8a04;                    /* 特殊班暗黃文字 */
-}
-
-/* ── 17. 頁尾訪客計數器與回饋按鈕區塊 ───────────────────── */
+    background-color: #fef9c3 !important;
+    color: #ca8a04 !important;
+}/* ── 17. 頁尾訪客計數器與回饋按鈕區塊 ───────────────────── */
 .app-footer {
     width: 100%;                       /* 滿寬 */
     margin-top: 1.5rem;                /* 上外邊距 24px */
