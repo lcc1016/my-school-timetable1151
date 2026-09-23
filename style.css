@@ -19,8 +19,8 @@
     --locked-text: #ef4444;        /* 鮮紅文字：綁課 🔒 標籤顏色 */
     --locked-p8-bg: #f3e8ff;       /* 淡紫背景：第 8 節綁課儲存格 */
     --locked-p8-text: #7e22ce;      /* 深紫文字：第 8 節綁課 🔒 標籤顏色 */
-    --lunch-bg: #f0fdf4;           /* 淡綠背景：午休與午餐時間列 */
-    --lunch-text: #15803d;         /* 深綠文字：午休與午餐時間文字 */
+    --lunch-bg: #c7d1e0;           /* 午休與午餐時間列背景色 */
+    --lunch-text: #1e293b;         /* 午休與午餐時間深色文字 */
 }
 
 /* ── 2. 基礎重置與 Body 樣式 ────────────────────────────── */
@@ -546,19 +546,26 @@ tr.period-8-row {
 }
 
 /* ── 12. 午餐/午休時間樣式 ──────────────────────────────── */
+tr.tr-break,
 .tr-lunch {
-    background-color: var(--lunch-bg);  /* 套用午休淡綠背景色 */
+    background-color: var(--lunch-bg) !important;  /* 套用午休整列背景色 */
 }
 
+.td-break-content,
 .td-lunch {
-    background-color: var(--lunch-bg);  /* 儲存格淡綠背景色 */
-    color: var(--lunch-text);          /* 綠色文字 */
-    font-weight: 700;                  /* 粗體 */
-    font-size: 0.95rem;                /* 字體 15.2px */
-    letter-spacing: 2px;               /* 字距加寬 2px */
-    padding: 8px 4px;                  /* 上下 padding 8px */
-    text-align: center;                /* 文字居中 */
-    vertical-align: middle;            /* 垂直居中 */
+    background-color: var(--lunch-bg) !important;  /* 儲存格背景色 */
+    color: var(--lunch-text) !important;          /* 深色文字 */
+    font-weight: 700;                              /* 粗體 */
+    font-size: 0.95rem;                            /* 字體 15.2px */
+    letter-spacing: 2px;                           /* 字距加寬 2px */
+    padding: 8px 4px;                              /* 上下 padding 8px */
+    text-align: center;                            /* 文字居中 */
+    vertical-align: middle;                        /* 垂直居中 */
+}
+
+/* 針對節次欄的午休列區塊 */
+tr.tr-break .td-period {
+    background-color: var(--lunch-bg) !important;
 }
 
 /* ── 13. 課表儲存格與文字樣式 ──────────────────────────── */
@@ -646,6 +653,51 @@ tr.period-8-row {
     padding: 2px 6px;                  /* 內邊距上下 2px，左右 6px */
     border-radius: 4px;                /* 圓角 4px */
     margin-top: 2px;                   /* 上邊距 2px */
+}
+
+/* ── 13.5 教師課表班級按鈕年級色彩設定 ────────────────────── */
+/* 七年級：淡藍底藍字 (例如: 710) */
+.cell-link.grade-7-link {
+    background-color: #e0f2fe !important;
+    color: #0284c7 !important;
+    border-color: #bae6fd !important;
+}
+.cell-link.grade-7-link:hover {
+    background-color: #0284c7 !important;
+    color: #ffffff !important;
+}
+
+/* 八年級：淡橘底橘字 (例如: 810) */
+.cell-link.grade-8-link {
+    background-color: #ffe4d9 !important;
+    color: #96482d !important;
+    border-color: #ffcbd1 !important;
+}
+.cell-link.grade-8-link:hover {
+    background-color: #96482d !important;
+    color: #ffffff !important;
+}
+
+/* 九年級：淡綠底綠字 (例如: 910) */
+.cell-link.grade-9-link {
+    background-color: #dcfce7 !important;
+    color: #15803d !important;
+    border-color: #bbf7d0 !important;
+}
+.cell-link.grade-9-link:hover {
+    background-color: #15803d !important;
+    color: #ffffff !important;
+}
+
+/* 特殊班/其他：淡黃底黃棕字 */
+.cell-link.grade-special-link {
+    background-color: #fef9c3 !important;
+    color: #ca8a04 !important;
+    border-color: #fef08a !important;
+}
+.cell-link.grade-special-link:hover {
+    background-color: #ca8a04 !important;
+    color: #ffffff !important;
 }
 
 /* ── 14. 綁課樣式 ───────────────────────────────────────── */
@@ -800,8 +852,8 @@ tr.period-8-row {
 }
 
 .form-group label.grade-8 {
-    background-color: #eef2ff;         /* 八年級淡靛紫背景 */
-    color: #6366f1;                    /* 八年級靛紫文字 */
+    background-color: #ffe4d9;         /* 八年級淡靛紫背景 */
+    color: #96482d;                    /* 八年級靛紫文字 */
 }
 
 .form-group label.grade-9 {
